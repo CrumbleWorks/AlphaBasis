@@ -1,0 +1,9 @@
+﻿Configuration
+-------------
+
+The configuration stored in the custom data could look like the following:
+
+[ResourcesDisplayConfig]
+LCD=Resources-LCD,Resources-LCD 2
+
+More LCDs to display the data can be added to the comma-seperated list.
