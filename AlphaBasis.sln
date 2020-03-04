@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TunnelBoringMachineDisplay"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourcesDisplay", "ResourcesDisplay\ResourcesDisplay.csproj", "{A55BE758-407B-4F00-B2B0-3E34289483FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaterialDisplay", "MaterialDisplay\MaterialDisplay.csproj", "{E295A9BD-1790-4A67-BEEC-ED30A628B63C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -16,6 +18,8 @@ Global
 		{1D46C665-F57F-4DC2-9429-4CE2798AE403}.Debug|x64.Build.0 = Debug|x64
 		{A55BE758-407B-4F00-B2B0-3E34289483FE}.Debug|x64.ActiveCfg = Debug|x64
 		{A55BE758-407B-4F00-B2B0-3E34289483FE}.Debug|x64.Build.0 = Debug|x64
+		{E295A9BD-1790-4A67-BEEC-ED30A628B63C}.Debug|x64.ActiveCfg = Debug|x64
+		{E295A9BD-1790-4A67-BEEC-ED30A628B63C}.Debug|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
