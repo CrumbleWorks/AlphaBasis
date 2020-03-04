@@ -1,9 +1,10 @@
 ﻿Configuration
 -------------
 
-The configuration stored in the custom data could look like the following:
+The configuration has to look like the following:
 
 [ResourcesDisplayConfig]
-LCD=Resources-LCD,Resources-LCD 2
+LCDGroup=Resource-LCDs
 
-More LCDs to display the data can be added to the comma-seperated list.
+Any LCD that should display resource-data has to be added to the group
+configured with the 'LCDGroup'-key.

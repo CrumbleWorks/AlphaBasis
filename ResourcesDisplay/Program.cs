@@ -30,6 +30,8 @@ namespace IngameScript
 
         public Program()
         {
+            Runtime.UpdateFrequency = UpdateFrequency.Update100;
+
             _ini = new MyIni();            
             _config = ReadConfiguration();
 
@@ -41,6 +43,7 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
+            _drawingSurfaces.ForEach(ds => ds.WriteText("", false));
             _drawingSurfaces.ForEach(ds => _powerDisplay.PrintPowerStatus(ds));
         }
 
@@ -94,12 +97,17 @@ namespace IngameScript
 
         public void PrintPowerStatus(IMyTextSurface textSurface)
         {
+            PrintPowerStatus(textSurface, _batteries);
+        }
+
+        public void PrintPowerStatus(IMyTextSurface textSurface, List<IMyBatteryBlock> batteries)
+        {
             PrintHeader(textSurface);
 
-            var totalCurrentInput = _batteries.Sum(b => b.CurrentInput);
-            var totalCurrentStored = _batteries.Sum(b => b.CurrentStoredPower);
-            var totalCurrentOutput = _batteries.Sum(b => b.CurrentOutput);
-            var totalMaxStored = _batteries.Sum(b => b.MaxStoredPower);
+            var totalCurrentInput = batteries.Sum(b => b.CurrentInput);
+            var totalCurrentStored = batteries.Sum(b => b.CurrentStoredPower);
+            var totalCurrentOutput = batteries.Sum(b => b.CurrentOutput);
+            var totalMaxStored = batteries.Sum(b => b.MaxStoredPower);
 
             var trend = totalCurrentInput - totalCurrentOutput;
             var trendString = GetTrendString(GetTrendDirection(trend), GetTrendLevel(trend));
