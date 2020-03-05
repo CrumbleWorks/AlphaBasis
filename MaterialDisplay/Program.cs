@@ -120,20 +120,24 @@ namespace IngameScript
                 _totalItemAmounts = new Dictionary<MyItemType, ItemAmount>();
                 foreach (var itemType in _allItemTypes)
                 {
-                    var amount = _inventories.Sum(i => i.GetItemAmount(itemType).RawValue);
-                    _totalItemAmounts.Add(itemType, new ItemAmount { current = amount });
+                    _totalItemAmounts.Add(itemType, new ItemAmount { current = GetItemsVolume(itemType) });
                 }
             }
             else
             {
                 foreach (var itemType in _totalItemAmounts.Keys)
                 {
-                    var amount = _inventories.Sum(i => i.GetItemAmount(itemType).RawValue);
-                    _totalItemAmounts[itemType].current = amount;
+                    _totalItemAmounts[itemType].current = GetItemsVolume(itemType);
                 }
             }
 
             _displays.ForEach(d => d.PrintMaterialStatus(_totalItemAmounts));
+        }
+
+        public long GetItemsVolume(MyItemType type)
+        {
+            var amount = _inventories.Sum(i => i.GetItemAmount(type).RawValue);
+            return Convert.ToInt64((double)amount * type.GetItemInfo().Volume);
         }
 
         private List<MaterialDisplayConfiguration> ReadConfiguration()
