@@ -3,7 +3,7 @@
 
 The configuration for this display has one section called 'MaterialDisplayConfig'.
 This section could in theory contain an infinte amount of configurations with the following structure:  
- > <key>=<comma-seperated list of items>;<display-group>;<title>
+ > \<key>=\<comma-seperated list of items>;\<display-group>;\<title>
 
 Example configuration:
 > [MaterialDisplayConfig]  
