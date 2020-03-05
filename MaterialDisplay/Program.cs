@@ -151,6 +151,7 @@ namespace IngameScript
 
                 // E.g. valueSplit[0] = "Stone,Iron Ore"
                 // E.g. valueSplit[1] = "StIronDisplays"
+                // E,g, valueSplit[2] = "Super Geils Display"
 
                 var itemKeys = valueSplit[0].Split(',');
 
@@ -174,7 +175,7 @@ namespace IngameScript
                 var textSurfaces = new List<IMyTextSurface>();
                 GridTerminalSystem.GetBlockGroupWithName(valueSplit[1]).GetBlocksOfType(textSurfaces);
 
-                materialDisplayConfigs.Add(new MaterialDisplayConfiguration { TextSurfaces = textSurfaces, Items = items });
+                materialDisplayConfigs.Add(new MaterialDisplayConfiguration { TextSurfaces = textSurfaces, Items = items, Title = valueSplit[2] });
             }
 
             return materialDisplayConfigs;
@@ -218,7 +219,7 @@ namespace IngameScript
             _displays = new List<MaterialDisplay>(_configs.Count);
             foreach (var config in _configs)
             {
-                _displays.Add(new MaterialDisplay(config.TextSurfaces, config.Items));
+                _displays.Add(new MaterialDisplay(config));
             }
         }
     }
@@ -227,6 +228,7 @@ namespace IngameScript
     {
         public List<IMyTextSurface> TextSurfaces { get; internal set; }
         public List<MyItemType> Items { get; internal set; }
+        public string Title { get; internal set; }
     }
 
     public class ItemTuple
@@ -237,42 +239,53 @@ namespace IngameScript
 
     public class MaterialDisplay
     {
-        private List<IMyTextSurface> _textSurfaces;
-        private List<MyItemType> _items;
+        private MaterialDisplayConfiguration _config;
 
-        public MaterialDisplay(List<IMyTextSurface> textSurfaces, List<MyItemType> items)
+        public MaterialDisplay(MaterialDisplayConfiguration config)
         {
-            this._textSurfaces = textSurfaces;
-            this._items = items;
+            _config = config;
         }
 
         public void PrintMaterialStatus(Dictionary<MyItemType, long> totalItemAmounts)
         {
-            _textSurfaces.ForEach(ts => {
+            _config.TextSurfaces.ForEach(ts => {
                 ts.WriteText("", false);
-                PrintHeader(ts);
+                PrintHeader(ts, _config.Title);
             });
 
-            foreach (var itemType in _items)
+            foreach (var itemType in _config.Items)
             {
-                var itemAmount = 0L;
-                totalItemAmounts.TryGetValue(itemType, out itemAmount);
-                itemAmount /= 1000000;
+                var itemUnit = " l";
+                var itemAmount = totalItemAmounts[itemType];
+                if (itemAmount > 1999999999)
+                {
+                    itemUnit = "Gl";
+                    itemAmount /= 1000000000;
+                }
+                else if (itemAmount > 1999999)
+                {
+                    itemUnit = "Ml";
+                    itemAmount /= 1000000;
+                }
+                else if(itemAmount > 1999)
+                {
+                    itemUnit = "kl";
+                    itemAmount /= 1000;
+                }
 
-                _textSurfaces.ForEach(ts => PrintSingleMaterialStatus(ts, itemType, itemAmount));
+                _config.TextSurfaces.ForEach(ts => PrintSingleMaterialStatus(ts, itemType, itemAmount, itemUnit));
             }
         }
 
-        private void PrintSingleMaterialStatus(IMyTextSurface textSurface, MyItemType itemType, long itemAmount)
+        private void PrintSingleMaterialStatus(IMyTextSurface textSurface, MyItemType itemType, long itemAmount, string unit)
         {
-            textSurface.WriteText($"\n{itemType.SubtypeId}: {itemAmount,7:0#,0}Ml\n".Replace(",", "\'"), true);
+            var label = itemType.SubtypeId;
+            textSurface.WriteText($"{$"{(label.Length > 9 ? label.Substring(0,9) : label)}:".PadRight(10)} {itemAmount,5:#,0} {unit}\n".Replace(",", "\'"), true);
         }
 
-        private void PrintHeader(IMyTextSurface textSurface)
+        private void PrintHeader(IMyTextSurface textSurface, string title)
         {
-            textSurface.WriteText("╔═════════════════╗", true);
-            textSurface.WriteText("\n║ Material Status ║", true);
-            textSurface.WriteText("\n╚═════════════════╝", true);
+            textSurface.WriteText($"{title}\n\n", true);
         }
     }
 }

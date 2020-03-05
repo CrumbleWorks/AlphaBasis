@@ -112,9 +112,9 @@ namespace IngameScript
             var trend = totalCurrentInput - totalCurrentOutput;
             var trendString = GetTrendString(GetTrendDirection(trend), GetTrendLevel(trend));
 
-            textSurface.WriteText($"\nInput : {totalCurrentInput:F3}MW", true);
-            textSurface.WriteText($"\nStored: {totalCurrentStored:F3}MW / {totalMaxStored:F3}MW", true);
-            textSurface.WriteText($"\nOutput: {totalCurrentOutput:F3}MW", true);
+            textSurface.WriteText($"\nInput : {totalCurrentInput:F3}MWh", true);
+            textSurface.WriteText($"\nStored: {totalCurrentStored:F3}MWh / {totalMaxStored:F3}MWh", true);
+            textSurface.WriteText($"\nOutput: {totalCurrentOutput:F3}MWh", true);
             textSurface.WriteText($"\nTrend : {trendString}", true);
         }
 

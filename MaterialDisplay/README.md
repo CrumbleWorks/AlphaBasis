@@ -2,13 +2,13 @@
 -------------
 
 The configuration for this display has one section called 'MaterialDisplayConfig'.
-This section could in theory contain an infinte amount of configurations with the following structure:
- <key>=<comma-seperated list of items>;<display-group>
+This section could in theory contain an infinte amount of configurations with the following structure:  
+ > <key>=<comma-seperated list of items>;<display-group>;<title>
 
 Example configuration:
 > [MaterialDisplayConfig]  
-> OreDisplay=Iron Ore,Gold Ore,Silicon Ore;OreDisplayGroup  
-> PlateDisplay=Steel Plate,Interior Plate;PlateDisplays1  
+> OreDisplay=Iron Ore,Gold Ore,Silicon Ore;OreDisplayGroup;Ores  
+> PlateDisplay=Steel Plate,Interior Plate;PlateDisplays1;Components  
 
 The following is a list of possible item names, which can be used in a configuration:
  "Bulletproof Glass",  
