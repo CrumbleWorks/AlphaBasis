@@ -27,6 +27,7 @@ namespace IngameScript
         List<IMyInventory> _inventories;
         List<MaterialDisplay> _displays;
         IEnumerable<MyItemType> _allItemTypes;
+        Dictionary<MyItemType, ItemAmount> _totalItemAmounts;
 
         IDictionary<string, ItemTuple> materialDict = new Dictionary<string, ItemTuple>()
         {
@@ -105,6 +106,7 @@ namespace IngameScript
             _configs = ReadConfiguration();
 
             _allItemTypes = _configs.SelectMany(config => config.Items).Distinct();
+
             _inventories = GetInventories();
 
             ConfigureDrawingSurfaces();
@@ -113,13 +115,25 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
-            var totalItemAmounts = new Dictionary<MyItemType, long>();
-            foreach (var itemType in _allItemTypes)
+            if (_totalItemAmounts == null) //cannot init in ctor because source data is not available
             {
-                var amount = _inventories.Sum(i => i.GetItemAmount(itemType).RawValue);
-                totalItemAmounts.Add(itemType, amount);
+                _totalItemAmounts = new Dictionary<MyItemType, ItemAmount>();
+                foreach (var itemType in _allItemTypes)
+                {
+                    var amount = _inventories.Sum(i => i.GetItemAmount(itemType).RawValue);
+                    _totalItemAmounts.Add(itemType, new ItemAmount { current = amount });
+                }
             }
-            _displays.ForEach(d => d.PrintMaterialStatus(totalItemAmounts));
+            else
+            {
+                foreach (var itemType in _totalItemAmounts.Keys)
+                {
+                    var amount = _inventories.Sum(i => i.GetItemAmount(itemType).RawValue);
+                    _totalItemAmounts[itemType].current = amount;
+                }
+            }
+
+            _displays.ForEach(d => d.PrintMaterialStatus(_totalItemAmounts));
         }
 
         private List<MaterialDisplayConfiguration> ReadConfiguration()
@@ -237,6 +251,14 @@ namespace IngameScript
         public string SubType { get; internal set; }
     }
 
+    public class ItemAmount
+    {
+        private long _current;
+        private Queue<long> _history = new Queue<long>(25);
+        public long current { get { return _current; } set { _current = value; _history.Enqueue(value); } }
+        public long historic { get { return Convert.ToInt64(_history.Average()); } }
+    }
+
     public class MaterialDisplay
     {
         private MaterialDisplayConfiguration _config;
@@ -246,9 +268,10 @@ namespace IngameScript
             _config = config;
         }
 
-        public void PrintMaterialStatus(Dictionary<MyItemType, long> totalItemAmounts)
+        public void PrintMaterialStatus(Dictionary<MyItemType, ItemAmount> totalItemAmounts)
         {
-            _config.TextSurfaces.ForEach(ts => {
+            _config.TextSurfaces.ForEach(ts =>
+            {
                 ts.WriteText("", false);
                 PrintHeader(ts, _config.Title);
             });
@@ -256,31 +279,47 @@ namespace IngameScript
             foreach (var itemType in _config.Items)
             {
                 var itemUnit = " l";
-                var itemAmount = totalItemAmounts[itemType];
-                if (itemAmount > 1999999999)
+                var itemAmount = totalItemAmounts[itemType].current;
+
+                var historicFactor = totalItemAmounts[itemType].current - totalItemAmounts[itemType].historic;
+                string trend;
+                if (historicFactor > 0)
+                {
+                    trend = "↑";
+                }
+                else if (historicFactor < 0)
+                {
+                    trend = "↓";
+                }
+                else
+                {
+                    trend = "=";
+                }
+
+                if (itemAmount > 1999999999L)
                 {
                     itemUnit = "Gl";
                     itemAmount /= 1000000000;
                 }
-                else if (itemAmount > 1999999)
+                else if (itemAmount > 1999999L)
                 {
                     itemUnit = "Ml";
                     itemAmount /= 1000000;
                 }
-                else if(itemAmount > 1999)
+                else if (itemAmount > 1999L)
                 {
                     itemUnit = "kl";
                     itemAmount /= 1000;
                 }
 
-                _config.TextSurfaces.ForEach(ts => PrintSingleMaterialStatus(ts, itemType, itemAmount, itemUnit));
+                _config.TextSurfaces.ForEach(ts => PrintSingleMaterialStatus(ts, itemType, itemAmount, itemUnit, trend));
             }
         }
 
-        private void PrintSingleMaterialStatus(IMyTextSurface textSurface, MyItemType itemType, long itemAmount, string unit)
+        private void PrintSingleMaterialStatus(IMyTextSurface textSurface, MyItemType itemType, long itemAmount, string unit, string trend)
         {
             var label = itemType.SubtypeId;
-            textSurface.WriteText($"{$"{(label.Length > 9 ? label.Substring(0,9) : label)}:".PadRight(10)} {itemAmount,5:#,0} {unit}\n".Replace(",", "\'"), true);
+            textSurface.WriteText($"{$"{(label.Length > 9 ? label.Substring(0, 9) : label)}:".PadRight(10)} {itemAmount,5:#,0} {unit} {trend}\n".Replace(",", "\'"), true);
         }
 
         private void PrintHeader(IMyTextSurface textSurface, string title)
