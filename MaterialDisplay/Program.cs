@@ -136,8 +136,8 @@ namespace IngameScript
 
         public long GetItemsVolume(MyItemType type)
         {
-            var amount = _inventories.Sum(i => i.GetItemAmount(type).RawValue);
-            return Convert.ToInt64((double)amount * type.GetItemInfo().Volume);
+            var amount = _inventories.Sum(i => i.GetItemAmount(type).RawValue / 1000); //m^3 to l
+            return Convert.ToInt64(Math.Truncate((double)amount * type.GetItemInfo().Volume));
         }
 
         private List<MaterialDisplayConfiguration> ReadConfiguration()
@@ -259,7 +259,13 @@ namespace IngameScript
     {
         private long _current;
         private Queue<long> _history = new Queue<long>(25);
+        /// <summary>
+        /// Current amount in liters
+        /// </summary>
         public long current { get { return _current; } set { _current = value; _history.Enqueue(value); } }
+        /// <summary>
+        /// Historic amount in liters
+        /// </summary>
         public long historic { get { return Convert.ToInt64(_history.Average()); } }
     }
 
