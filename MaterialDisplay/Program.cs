@@ -292,19 +292,7 @@ namespace IngameScript
                 var itemAmount = totalItemAmounts[itemType].current;
 
                 var historicFactor = totalItemAmounts[itemType].current - totalItemAmounts[itemType].historic;
-                string trend;
-                if (historicFactor > 0)
-                {
-                    trend = "↑";
-                }
-                else if (historicFactor < 0)
-                {
-                    trend = "↓";
-                }
-                else
-                {
-                    trend = "=";
-                }
+                string trend = historicFactor > 0 ? "↑" : historicFactor < 0 ? "↓" : "=";
 
                 if (itemAmount > 1999999999L)
                 {
