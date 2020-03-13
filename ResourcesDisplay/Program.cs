@@ -181,17 +181,17 @@ namespace IngameScript
         {
             var itemUnit = " l";
 
-            if (itemAmount > 1999999999L)
+            if (itemAmount > 9999999999L)
             {
                 itemUnit = "Gl";
                 itemAmount /= 1000000000;
             }
-            else if (itemAmount > 1999999L)
+            else if (itemAmount > 9999999L)
             {
                 itemUnit = "Ml";
                 itemAmount /= 1000000;
             }
-            else if (itemAmount > 1999L)
+            else if (itemAmount > 9999L)
             {
                 itemUnit = "kl";
                 itemAmount /= 1000;
