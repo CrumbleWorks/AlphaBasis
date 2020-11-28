@@ -56,6 +56,13 @@ namespace IngameScript
             foreach (var drillName in drillNames)
             {
                 var drillGroup = GridTerminalSystem.GetBlockGroupWithName(drillName);
+
+                if (drillGroup == null)
+                {
+                    Echo($"No group named '{drillName} found. Skipping this entry.");
+                    continue;
+                }
+
                 var blocks = new List<IMyTerminalBlock>();
                 drillGroup.GetBlocks(blocks);
 
