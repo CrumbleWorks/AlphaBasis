@@ -27,8 +27,10 @@ namespace IngameScript
             public string Label { get; private set; }
 
             public float BaseLength { get; private set; }
-            public float CurrentLength { get { return Piston.CurrentPosition - Piston.MinLimit; } }
+            public float CurrentLength { get { return BaseLength + Piston.CurrentPosition - Piston.MinLimit; } }
             public float MaxLength { get { return BaseLength + Piston.MaxLimit - Piston.MinLimit; } }
+            public float CurrentExtension { get { return Piston.CurrentPosition - Piston.MinLimit;  } }
+            public float MaxExtension { get { return Piston.MaxLimit - Piston.MinLimit; } }
 
             public PistonData(IMyPistonBase piston, string label, float baseLength)
             {
@@ -83,12 +85,14 @@ namespace IngameScript
             private static void PrintTotalSpeedAndVelocity(IMyTextSurface textSurface, List<PistonData> pistons)
             {
                 var totalVelocity = pistons.Sum(p => p.Piston.Velocity);
-                var totalLength = pistons.Sum(p => p.Piston.CurrentPosition);
-                var maxLenght = pistons.Sum(p => p.MaxLength);
+                var totalExtension = pistons.Sum(p => p.CurrentExtension);
+                var maxExtension = pistons.Sum(p => p.MaxExtension);
+                var totalLength = pistons.Sum(p => p.CurrentLength);
+                var maxLength = pistons.Sum(p => p.MaxLength);
 
-                textSurface.WriteText($"Total velocity: {totalVelocity,7:F4}m/s\n", true);
-                textSurface.WriteText($"Total length:   {totalLength,7:F4}m\n", true);
-                textSurface.WriteText($"Max length:     {maxLenght,7:F4}m\n", true);
+                textSurface.WriteText($"Total velocity:  {totalVelocity,7:F4}m/s\n", true);
+                textSurface.WriteText($"Total Extension: {totalExtension,7:F4}m / {maxExtension,7:F4}m\n", true);
+                textSurface.WriteText($"Total Length:    {totalLength,7:F4}m / {maxLength,7:F4}m\n", true);
             }
 
             private static void PrintStatus(IMyTextSurface textSurface, PistonData pistonData)
