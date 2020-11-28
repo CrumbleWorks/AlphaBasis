@@ -30,6 +30,12 @@ namespace IngameScript
                 textSurface.WriteText("║ Inventory Status ║\n", true);
                 textSurface.WriteText("╚══════════════════╝\n", true);
 
+                if (!inventories.Any())
+                {
+                    textSurface.WriteText("No inventories configured.\n", true);
+                    return;
+                }
+
                 var currentVolume = inventories.Sum(i => i.CurrentVolume.RawValue);
                 var maxVolume = inventories.Sum(i => i.MaxVolume.RawValue);
 

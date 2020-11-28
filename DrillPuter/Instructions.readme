@@ -14,10 +14,18 @@ The value of an entry should correspond to a group containing the following bloc
 - Stator / Rotor
 - Displays
 
+---
+
 Displays are split into two different kinds.
+There are information-displays, which give a brief overview of several key numbers of a drill. These are marked with the tag [I].
+There are also details-displays, which show the current extension and speeds of the various pistons. These are marked with the tag [D].
 
-There are information-displays, which give a brief overview of several key numbers of a drill.
-These can be marked by putting the string 'information' into their name.
+---
 
-There are also details-displays, which show the current extension and speeds of the various pistons.
-These can be marked by putting the string 'details' into their name.
+Pistons can also be of two kinds.
+Drill pistons are vertical pistons. These have no special marking.
+Arm pistons are (generally) horizontal pistons. These are marked with the tag [A].
+
+---
+
+The stator / rotor responsible for rotating the whole drill is marked with the tag [S].

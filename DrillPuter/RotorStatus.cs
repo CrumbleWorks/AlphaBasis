@@ -29,6 +29,12 @@ namespace IngameScript
                 textSurface.WriteText("║ Rotor Status ║\n", true);
                 textSurface.WriteText("╚══════════════╝\n", true);
 
+                if (stator == null)
+                {
+                    textSurface.WriteText("Main stator not configured.\n", true);
+                    return;
+                }
+
                 var velocity = stator.TargetVelocityRPM;
                 var angleDeg = RadianToDegree(stator.Angle);
 

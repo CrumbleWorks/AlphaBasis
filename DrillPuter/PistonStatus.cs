@@ -41,12 +41,26 @@ namespace IngameScript
             public static void PrintPistonStatusShort(IMyTextSurface textSurface, List<PistonData> pistons)
             {
                 PrintHeader(textSurface);
+
+                if (!pistons.Any())
+                {
+                    textSurface.WriteText("No pistons configured.\n", true);
+                    return;
+                }
+
                 PrintTotalSpeedAndVelocity(textSurface, pistons);
             }
 
             public static void PrintPistonsStatusLong(IMyTextSurface textSurface, List<PistonData> pistons)
             {
                 PrintHeader(textSurface);
+
+                if (!pistons.Any())
+                {
+                    textSurface.WriteText("No pistons configured.\n", true);
+                    return;
+                }
+
                 PrintPistonStatus(textSurface, pistons);
                 PrintTotalSpeedAndVelocity(textSurface, pistons);
             }

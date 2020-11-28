@@ -32,9 +32,13 @@ namespace IngameScript
         }
 
         const string drillPuterConfigurationKey = "DrillPuterConfiguration";
+        const string drillArmTag = "[A]";
+        const string informationDisplayTag = "[I]";
+        const string detailsDisplayTag = "[D]";
+        const string mainMotorStatorTag = "[S]";
 
-        MyIni _ini;
-        List<Drill> _drills;
+        readonly MyIni _ini;
+        readonly List<Drill> _drills;
 
         public Program()
         {
@@ -43,8 +47,6 @@ namespace IngameScript
             _ini = new MyIni();
             _drills = InitDrills();
             ConfigureDisplays();
-
-            new PistonData(null, null);
         }
 
         private List<Drill> InitDrills()
@@ -59,18 +61,22 @@ namespace IngameScript
 
                 var inventories = blocks.FindAll(b => b.HasInventory).Select(b => b.GetInventory()).ToList();
                 var stators = new List<IMyMotorStator>();
-                var pistonBases = new List<IMyPistonBase>();
+                var allPistonBases = new List<IMyPistonBase>();
                 var displays = new List<IMyTextSurface>();
 
                 drillGroup.GetBlocksOfType(stators);
-                drillGroup.GetBlocksOfType(pistonBases);
+                drillGroup.GetBlocksOfType(allPistonBases);
                 drillGroup.GetBlocksOfType(displays);
 
-                var informationDisplays = FilterTextSurfacesByName(displays, "information");
-                var detailsDisplays = FilterTextSurfacesByName(displays, "details");
-                var pistons = InitPistonData(pistonBases);
+                var informationDisplays = FilterTextSurfacesByTag(displays, informationDisplayTag);
+                var detailsDisplays = FilterTextSurfacesByTag(displays, detailsDisplayTag);
+                var armPistons = GetArmPistons(allPistonBases);
+                var drillPistons = allPistonBases.Except(armPistons).ToList();
 
-                drills.Add(new Drill { Stator = stators[0], Pistons = pistons, Inventories = inventories, InformationDisplays = informationDisplays, DetailsDisplays = detailsDisplays });
+                var pistons = InitPistonData(drillPistons);
+                var mainStator = GetMainStator(stators);
+
+                drills.Add(new Drill { Stator = mainStator, Pistons = pistons, Inventories = inventories, InformationDisplays = informationDisplays, DetailsDisplays = detailsDisplays });
             }
             return drills;
         }
@@ -94,9 +100,30 @@ namespace IngameScript
             return drillNames;
         }
 
-        private List<IMyTextSurface> FilterTextSurfacesByName(List<IMyTextSurface> textSurfaces, string filter)
+        private List<IMyTextSurface> FilterTextSurfacesByTag(List<IMyTextSurface> textSurfaces, string tag)
         {
-            return textSurfaces.FindAll(ts => (ts as IMyTerminalBlock).CustomName.ToLower().Contains(filter));
+            return textSurfaces.FindAll(ts => (ts as IMyTerminalBlock).CustomName.Contains(tag));
+        }
+
+        private List<IMyPistonBase> GetArmPistons(List<IMyPistonBase> pistons)
+        {
+            return pistons.FindAll(pb => pb.CustomName.Contains(drillArmTag));
+        }
+
+        private IMyMotorStator GetMainStator(List<IMyMotorStator> stators)
+        {
+            var mainStators = stators.FindAll(s => s.CustomName.Contains(mainMotorStatorTag));
+            if (!mainStators.Any())
+            {
+                Echo("No rotor marked with [S] found. No rotation information will be displayed.");
+                return null;
+            }
+            else if (mainStators.Count > 1)
+            {
+                Echo("Found more then one rotor marked with [S]. Using first result.");
+                return mainStators[0];
+            }
+            return mainStators[0];
         }
 
         private List<PistonData> InitPistonData(List<IMyPistonBase> pistonBases)
