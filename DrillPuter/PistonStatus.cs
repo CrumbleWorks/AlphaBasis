@@ -26,13 +26,15 @@ namespace IngameScript
             public IMyPistonBase Piston { get; private set; }
             public string Label { get; private set; }
 
+            public float BaseLength { get; private set; }
             public float CurrentLength { get { return Piston.CurrentPosition - Piston.MinLimit; } }
-            public float MaxLength { get { return Piston.MaxLimit - Piston.MinLimit; } }
+            public float MaxLength { get { return BaseLength + Piston.MaxLimit - Piston.MinLimit; } }
 
-            public PistonData(IMyPistonBase piston, string label)
+            public PistonData(IMyPistonBase piston, string label, float baseLength)
             {
                 this.Piston = piston;
                 this.Label = label;
+                this.BaseLength = baseLength;
             }
         }
 

@@ -131,7 +131,8 @@ namespace IngameScript
             var pistons = new List<PistonData>(pistonBases.Count);
             for (int i = 0; i < pistonBases.Count; i++)
             {
-                pistons.Add(new PistonData(pistonBases[i], (i + 1).ToString()));
+                var pistonBase = pistonBases[i];
+                pistons.Add(new PistonData(pistonBase, (i + 1).ToString(), pistonBase.HighestPosition / 2));
             }
             return pistons;
         }
