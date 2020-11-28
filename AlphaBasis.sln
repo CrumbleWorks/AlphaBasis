@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaterialDisplay", "Material
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrillPuter", "DrillPuter\DrillPuter.csproj", "{549BEC5F-96D0-4B4F-9A9E-6377D9A07AA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarPuter", "SolarPuter\SolarPuter.csproj", "{E9A3DBA0-D0D0-4B9B-80D0-1E645218CF8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -20,6 +22,8 @@ Global
 		{E295A9BD-1790-4A67-BEEC-ED30A628B63C}.Debug|x64.Build.0 = Debug|x64
 		{549BEC5F-96D0-4B4F-9A9E-6377D9A07AA4}.Debug|x64.ActiveCfg = Debug|x64
 		{549BEC5F-96D0-4B4F-9A9E-6377D9A07AA4}.Debug|x64.Build.0 = Debug|x64
+		{E9A3DBA0-D0D0-4B9B-80D0-1E645218CF8C}.Debug|x64.ActiveCfg = Debug|x64
+		{E9A3DBA0-D0D0-4B9B-80D0-1E645218CF8C}.Debug|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

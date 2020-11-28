@@ -1,0 +1,13 @@
+﻿README
+------
+
+Put a configuration like the following one into the custom data of a programmable block, which should act as a SolarPuter:
+
+[SolarPuterConfiguration]
+SolarArrays=Solar 1;Solar 2;Solar 3
+DisplayGroup=Solar Displays
+
+The list in 'SolarArrays' can be extended by adding groups of solar arrays seperated by semi-colons.
+
+Driving rotors are marked with the tag [D].
+Bearing rotors are marked with the tag [B].
