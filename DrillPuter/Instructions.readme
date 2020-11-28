@@ -1,0 +1,23 @@
+﻿README
+-----------
+
+Put a configuration like the following one into the custom data of a programmable block, which should act as a DrillPuter:
+
+[DrillPuterConfiguration]
+Drill.0=Drill
+
+The list can be extended by adding more entries in the style of 'Drill.x', where 'x' is a unique integer.
+The value of an entry should correspond to a group containing the following blocks of a single drill:
+
+- Pistons
+- Drill-Heads
+- Stator / Rotor
+- Displays
+
+Displays are split into two different kinds.
+
+There are information-displays, which give a brief overview of several key numbers of a drill.
+These can be marked by putting the string 'information' into their name.
+
+There are also details-displays, which show the current extension and speeds of the various pistons.
+These can be marked by putting the string 'details' into their name.
