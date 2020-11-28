@@ -122,12 +122,12 @@ namespace IngameScript
             var mainStators = stators.FindAll(s => s.CustomName.Contains(mainMotorStatorTag));
             if (!mainStators.Any())
             {
-                Echo("No rotor marked with [S] found. No rotation information will be displayed.");
+                Echo($"No rotor marked with {mainMotorStatorTag} found. No rotation information will be displayed.");
                 return null;
             }
             else if (mainStators.Count > 1)
             {
-                Echo("Found more then one rotor marked with [S]. Using first result.");
+                Echo($"Found more then one rotor marked with {mainMotorStatorTag}. Using first result.");
                 return mainStators[0];
             }
             return mainStators[0];
