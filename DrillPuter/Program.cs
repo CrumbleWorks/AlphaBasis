@@ -59,7 +59,7 @@ namespace IngameScript
 
                 if (drillGroup == null)
                 {
-                    Echo($"No group named '{drillName} found. Skipping this entry.");
+                    Echo($"No group named '{drillName}' found. Skipping this entry.");
                     continue;
                 }
 
