@@ -4,10 +4,10 @@
 Put a configuration like the following one into the custom data of a programmable block, which should act as a DrillPuter:
 
 [DrillPuterConfiguration]
-Drill.0=Drill
+Drill1=Drill
 
-The list can be extended by adding more entries in the style of 'Drill.x', where 'x' is a unique integer.
-The value of an entry should correspond to a group containing the following blocks of a single drill:
+The list can be extended by adding more entries in the style of 'X=Y', where X is a unique string
+and Y is the name of a group containing the following blocks of a single drill:
 
 - Pistons
 - Drill-Heads
