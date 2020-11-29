@@ -23,8 +23,8 @@ There are also details-displays, which show the current extension and speeds of 
 ---
 
 Pistons can also be of two kinds.
-Drill pistons are vertical pistons. These have no special marking.
-Arm pistons are (generally) horizontal pistons. These are marked with the tag [A].
+Arm pistons are the pistons, which push the drillhead forward. These are marked with the tag [A].
+Drill pistons are pistons, which (generally) extend perpendicular to the arm of the drill. These have no special marking.
 
 ---
 

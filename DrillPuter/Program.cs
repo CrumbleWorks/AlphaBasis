@@ -80,7 +80,7 @@ namespace IngameScript
                 var armPistons = GetArmPistons(allPistonBases);
                 var drillPistons = allPistonBases.Except(armPistons).ToList();
 
-                var pistons = InitPistonData(drillPistons);
+                var pistons = InitPistonData(armPistons);
                 var mainStator = GetMainStator(stators);
 
                 drills.Add(new Drill { Stator = mainStator, Pistons = pistons, Inventories = inventories, InformationDisplays = informationDisplays, DetailsDisplays = detailsDisplays });
