@@ -195,15 +195,12 @@ namespace IngameScript
                         // Panel is at sunrise-angle. Stop rotating.
                         drivingRotor.TargetVelocityRPM = 0;
                         solarArray.MovementStatus = SolarArrayMovementStatus.Stopped;
-                        continue;
                     }
-
-                    if (solarArray.MaxOutput == 0 && !NearlyEqual(drivingRotor.Angle, drivingRotor.LowerLimitRad, epsilonPanelAngel))
+                    else if (solarArray.MaxOutput == 0 && !NearlyEqual(drivingRotor.Angle, drivingRotor.LowerLimitRad, epsilonPanelAngel))
                     {
                         // It's dark. Rotate back to sunrise-angle.
                         drivingRotor.TargetVelocityRPM = returnVelocity;
                         solarArray.MovementStatus = SolarArrayMovementStatus.ReturnToStartingPosition;
-                        continue;
                     }
                 }
                 else if (solarArray.MaxOutput < solarArray.PreviousMaxOutput)
