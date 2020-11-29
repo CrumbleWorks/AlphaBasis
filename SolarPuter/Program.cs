@@ -48,6 +48,11 @@ namespace IngameScript
         const string bearingRotorTag = "[B]";
         const string drivingRotorTag = "[D]";
 
+        const float followingVelocity = 0.01f;
+        const float returnVelocity = -0.1f;
+
+        const float epsilonPanelAngel = 0.00174533f; // 0.1 deg in rad
+
         readonly MyIni _ini;
         readonly List<SolarArray> _solarArrays;
         readonly List<IMyTextSurface> _displays;
@@ -181,26 +186,30 @@ namespace IngameScript
             {
                 var drivingRotor = solarArray.DrivingRotor;
 
-                if (drivingRotor.Angle == drivingRotor.LowerLimitRad && drivingRotor.TargetVelocityRPM == -1)
-                {
-                    // Panel is at sunrise-angle. Stop rotating.
-                    drivingRotor.TargetVelocityRPM = 0;
-                    solarArray.MovementStatus = SolarArrayMovementStatus.Stopped;
-                    continue;
-                }
-
                 if (solarArray.MaxOutput == 0)
                 {
-                    // It's dark. Rotate back to sunrise-angle.
-                    drivingRotor.TargetVelocityRPM = -0.1f;
-                    solarArray.MovementStatus = SolarArrayMovementStatus.ReturnToStartingPosition;
-                    continue;
-                }
+                    // No sun.
 
-                if (solarArray.MaxOutput < solarArray.PreviousMaxOutput)
+                    if (NearlyEqual(drivingRotor.Angle, drivingRotor.LowerLimitRad, epsilonPanelAngel))
+                    {
+                        // Panel is at sunrise-angle. Stop rotating.
+                        drivingRotor.TargetVelocityRPM = 0;
+                        solarArray.MovementStatus = SolarArrayMovementStatus.Stopped;
+                        continue;
+                    }
+
+                    if (solarArray.MaxOutput == 0 && !NearlyEqual(drivingRotor.Angle, drivingRotor.LowerLimitRad, epsilonPanelAngel))
+                    {
+                        // It's dark. Rotate back to sunrise-angle.
+                        drivingRotor.TargetVelocityRPM = returnVelocity;
+                        solarArray.MovementStatus = SolarArrayMovementStatus.ReturnToStartingPosition;
+                        continue;
+                    }
+                }
+                else if (solarArray.MaxOutput < solarArray.PreviousMaxOutput)
                 {
                     // Less sun. Turn towards upper limit.
-                    drivingRotor.TargetVelocityRPM = 0.01f;
+                    drivingRotor.TargetVelocityRPM = followingVelocity;
                     solarArray.MovementStatus = SolarArrayMovementStatus.FollowingSun;
                 }
                 else
@@ -215,6 +224,11 @@ namespace IngameScript
         private void UpdatePreviousOutput()
         {
             _solarArrays.ForEach(sa => sa.PreviousMaxOutput = sa.MaxOutput);
+        }
+
+        private static bool NearlyEqual(float a, float b, float epsilon)
+        {
+            return Math.Abs(a - b) < epsilon;
         }
     }
 }
