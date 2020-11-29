@@ -27,6 +27,19 @@ namespace IngameScript
             public List<IMySolarPanel> Panels { get; internal set; }
             public IMyMotorStator DrivingRotor { get; internal set; }
             public IMyMotorStator Bearing { get; internal set; }
+
+            public float CurrentOutput { get { return Panels.Sum(p => p.CurrentOutput); } }
+            public float MaxOutput { get { return Panels.Sum(p => p.MaxOutput); } }
+            public float PreviousMaxOutput { get; set; }
+
+            public SolarArrayMovementStatus MovementStatus { get; set; }
+        }
+
+        public enum SolarArrayMovementStatus
+        {
+            Stopped,
+            FollowingSun,
+            ReturnToStartingPosition
         }
 
         const string solarPuterConfigurationKey = "SolarPuterConfiguration";
@@ -86,7 +99,7 @@ namespace IngameScript
                 var drivingRotor = GetSingleRotorByTag(stators, drivingRotorTag);
                 var bearing = GetSingleRotorByTag(stators, bearingRotorTag);
 
-                solarArrays.Add(new SolarArray { Label = solarArrayName, Panels = panels, DrivingRotor = drivingRotor, Bearing = bearing});
+                solarArrays.Add(new SolarArray { Label = solarArrayName, Panels = panels, DrivingRotor = drivingRotor, Bearing = bearing, PreviousMaxOutput = 0, MovementStatus = SolarArrayMovementStatus.Stopped});
             }
             return solarArrays;
         }
@@ -148,11 +161,60 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
+            PrintStatus();
+            RotateSolarArrays();
+            UpdatePreviousOutput();
+        }
+
+        private void PrintStatus()
+        {
             _displays.ForEach(d =>
             {
                 d.WriteText("");
                 SolarArrayStatus.PrintSolarArraysStatus(d, _solarArrays);
             });
+        }
+
+        private void RotateSolarArrays()
+        {
+            foreach (var solarArray in _solarArrays)
+            {
+                var drivingRotor = solarArray.DrivingRotor;
+
+                if (drivingRotor.Angle == drivingRotor.LowerLimitRad && drivingRotor.TargetVelocityRPM == -1)
+                {
+                    // Panel is at sunrise-angle. Stop rotating.
+                    drivingRotor.TargetVelocityRPM = 0;
+                    solarArray.MovementStatus = SolarArrayMovementStatus.Stopped;
+                    continue;
+                }
+
+                if (solarArray.MaxOutput == 0)
+                {
+                    // It's dark. Rotate back to sunrise-angle.
+                    drivingRotor.TargetVelocityRPM = -0.1f;
+                    solarArray.MovementStatus = SolarArrayMovementStatus.ReturnToStartingPosition;
+                    continue;
+                }
+
+                if (solarArray.MaxOutput < solarArray.PreviousMaxOutput)
+                {
+                    // Less sun. Turn towards upper limit.
+                    drivingRotor.TargetVelocityRPM = 0.01f;
+                    solarArray.MovementStatus = SolarArrayMovementStatus.FollowingSun;
+                }
+                else
+                {
+                    // More sun. Stop turning.
+                    drivingRotor.TargetVelocityRPM = 0f;
+                    solarArray.MovementStatus = SolarArrayMovementStatus.Stopped;
+                }
+            }
+        }
+
+        private void UpdatePreviousOutput()
+        {
+            _solarArrays.ForEach(sa => sa.PreviousMaxOutput = sa.MaxOutput);
         }
     }
 }
