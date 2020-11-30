@@ -205,9 +205,20 @@ namespace IngameScript
                 }
                 else if (solarArray.MaxOutput < solarArray.PreviousMaxOutput)
                 {
-                    // Less sun. Turn towards upper limit.
-                    drivingRotor.TargetVelocityRPM = followingVelocity;
-                    solarArray.MovementStatus = SolarArrayMovementStatus.FollowingSun;
+                    // Less sun.
+
+                    if (NearlyEqual(drivingRotor.Angle, drivingRotor.UpperLimitRad, epsilonPanelAngel))
+                    {
+                        // Panel is at sunset-angle. Stop rotating.
+                        drivingRotor.TargetVelocityRPM = 0;
+                        solarArray.MovementStatus = SolarArrayMovementStatus.Stopped;
+                    }
+                    else
+                    {
+                        // Turn towards upper limit.
+                        drivingRotor.TargetVelocityRPM = followingVelocity;
+                        solarArray.MovementStatus = SolarArrayMovementStatus.FollowingSun;
+                    }
                 }
                 else
                 {
