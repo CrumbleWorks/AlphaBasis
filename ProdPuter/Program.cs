@@ -21,7 +21,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        readonly IDictionary<string, MyItemType> materialDict = new Dictionary<string, MyItemType>()
+        private readonly IDictionary<string, MyItemType> materialDict = new Dictionary<string, MyItemType>()
         {
             { "Bulletproof Glass", new MyItemType("MyObjectBuilder_Component", "BulletproofGlass") },
             { "Canvas", new MyItemType("MyObjectBuilder_Component", "Canvas") },
@@ -73,16 +73,21 @@ namespace IngameScript
             public Dictionary<string, List<int>> ProductionGoals { get; internal set; }
             public List<IMyAssembler> Assemblers { get; internal set; }
             public List<IMyInventory> Containers { get; internal set; }
+
+            public string CurrentlyProducedItem { get; internal set; }
+            public int CurrentlyProducedLevel { get; internal set; }
         }
 
-        const string prodPuterConfigurationSection = "ProdPuterConfiguration";
-        const string cargoGroupConfigurationKey = "CargoGroup";
-        const string assemblerGroupConfigurationKey = "AssemblerGroup";
-        const string itemsConfigurationKey = "Items";
+        private static readonly string prodPuterConfigurationSection = "ProdPuterConfiguration";
+        private static readonly string cargoGroupConfigurationKey = "CargoGroup";
+        private static readonly string assemblerGroupConfigurationKey = "AssemblerGroup";
+        private static readonly string itemsConfigurationKey = "Items";
 
-        readonly MyIni _ini;
+        private static readonly decimal uftragsMängi = 100;
 
-        readonly List<ProductionConfig> productionConfigs;
+        private readonly MyIni _ini;
+
+        private readonly List<ProductionConfig> productionConfigs;
 
         public Program()
         {
@@ -167,17 +172,21 @@ namespace IngameScript
         {
             foreach (var config in productionConfigs)
             {
-                var materialAmounts = GetMaterialAmounts(config);
-                var productionLevels = GetProductionLevels(config, materialAmounts);
-                var minProductionLevel = productionLevels.Values.Min();
-                var materialsToBeOrdered = productionLevels.Where(pl => pl.Value.Equals(minProductionLevel)).Select(pl => pl.Key).ToList();
-                var orders = GetOrders(config, minProductionLevel + 1, materialsToBeOrdered);
+                config.CurrentlyProducedLevel = int.MaxValue;
+                CalculateProductionState(config);
 
-                PutOrders(config, orders);
+                foreach (var assembler in config.Assemblers)
+                {
+                    if (assembler.IsQueueEmpty)
+                    {
+                        assembler.ClearQueue();
+                        assembler.AddQueueItem(materialDict[config.CurrentlyProducedItem], uftragsMängi);
+                    }
+                }
             }
         }
 
-        private Dictionary<string, long> GetMaterialAmounts(ProductionConfig config)
+        private Dictionary<string, long> GetStoredComponents(ProductionConfig config)
         {
             var amountsPerMaterial = new Dictionary<string, long>();
             foreach (var material in config.ProductionGoals.Keys)
@@ -191,57 +200,33 @@ namespace IngameScript
 
         private long GetItemCount(MyItemType type, List<IMyInventory> inventories)
         {
-            return inventories.Sum(i => {
+            return inventories.Sum(i =>
+            {
                 var items = new List<MyInventoryItem>();
                 i.GetItems(items, item => item.Type.Equals(type));
                 return items.Count;
             });
         }
 
-        private Dictionary<string, int> GetProductionLevels(ProductionConfig config, Dictionary<string, long> materialAmounts)
+        private void CalculateProductionState(ProductionConfig config)
         {
-            var productionLevels = new Dictionary<string, int>();
-            foreach (var materialGoals in config.ProductionGoals)
+            var storedComponents = GetStoredComponents(config);
+            foreach (var productionGoals in config.ProductionGoals)
             {
-                var materialAmount = materialAmounts[materialGoals.Key];
+                var amountOfThisComponentInStorage = storedComponents[productionGoals.Key];
                 var productionLevel = 0;
-                foreach (var level in materialGoals.Value)
+                foreach (var level in productionGoals.Value)
                 {
-                    if (materialAmount >= level)
+                    if (amountOfThisComponentInStorage >= level)
                     {
                         productionLevel += 1;
                     }
                 }
-                productionLevels.Add(materialGoals.Key, productionLevel);
-            }
-            return productionLevels;
-        }
 
-        private Dictionary<string, long> GetOrders(ProductionConfig config, int targetProductionLevel, List<string> materials)
-        {
-            var orders = new Dictionary<string, long>();
-            foreach (var material in materials)
-            {
-                var targetAmount = config.ProductionGoals[material][targetProductionLevel];
-                orders.Add(material, targetAmount);
-            }
-            return orders;
-        }
-
-        private void PutOrders(ProductionConfig config, Dictionary<string, long> orders)
-        {
-            var assemblerCount = config.Assemblers.Count;
-
-            foreach (var order in orders)
-            {
-                var material = order.Key;
-                var orderSize = order.Value;
-
-                double orderSizePerAssembler = orderSize / assemblerCount;
-
-                foreach (var assembler in config.Assemblers)
+                if (config.CurrentlyProducedLevel > productionLevel)
                 {
-                    assembler.AddQueueItem(materialDict[material], orderSizePerAssembler);
+                    config.CurrentlyProducedLevel = productionLevel;
+                    config.CurrentlyProducedItem = productionGoals.Key;
                 }
             }
         }
