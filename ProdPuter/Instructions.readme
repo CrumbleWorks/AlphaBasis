@@ -1,5 +1,66 @@
-﻿R e a d m e
------------
+﻿README
+------
 
-In this file you can include any instructions or other comments you want to have injected onto the 
-top of your final script. You can safely delete this file if you do not want any such comments.
+Put a configuration like the following one into the custom data of a programmable block, which should act as a ProdPuter:
+
+[ProdPuterConfiguration]
+Tubes.Items=Large Steel Tube,Small Steel Tube
+Tubes.0=100,500
+Tubes.1=1000,5000
+Tubes.2=5000,15000
+Tubes.CargoGroup=TubeContainers
+Tubes.AssemblerGroup=TubeAssemblers
+
+The key consists of two parts.
+The part before the period is an identifier for a single production configuration.
+The part after the period is used to define the following things:
+ - Items => The items to be produced.
+ - CargoGroup => The group containing the inventories to be checked.
+ - AssemblerGroup => The group containing the assemblers used for production.
+The production goals are configured by adding an integer to the identifier and adding a comma-seperated list of goals.
+Every item listed in 'Items' has to have a corresponding entry in the production goals.
+
+The following is a list of possible item names, which can be used in a configuration:
+ "Bulletproof Glass",  
+ "Canvas",  
+ "Computer",  
+ "Construction Comp",  
+ "Detector Comp",  
+ "Display",  
+ "Explosives",  
+ "Girder",  
+ "Gravity Gen. Comp",  
+ "Interior Plate",  
+ "Large Steel Tube",  
+ "Medical Comp",  
+ "Metal Grid",  
+ "Motor",  
+ "Power Cell",  
+ "Radio Comm. Comp",  
+ "Reactor Comp",  
+ "Small Steel Tube",  
+ "Solar Cell",  
+ "Steel Plate",  
+ "Superconductor",  
+ "Thruster Comp",  
+ "Automatic Rifle",  
+ "Precise Rifle",  
+ "Rapid Fire Rifle",  
+ "Ultimate Rifle",  
+ "Welder 1",  
+ "Welder 2",  
+ "Welder 3",  
+ "Welder 4",  
+ "Grinder 1",  
+ "Grinder 2",  
+ "Grinder 3",  
+ "Grinder 4",  
+ "Drill 1",  
+ "Drill 2",  
+ "Drill 3",  
+ "Drill 4",  
+ "Oxygen Bottle",  
+ "Hydrogen Bottle",  
+ "NATO 5.56x45mm",  
+ "NATO 25x184mm",  
+ "Missile 200mm"
