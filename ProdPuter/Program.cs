@@ -241,10 +241,9 @@ namespace IngameScript
                     continue;
                 }
 
-                Echo("-------");
-                Echo($"item: {config.CurrentlyProducedItem}");
-                Echo($"level: {config.CurrentlyProducedLevel}");
-                Echo("=======");
+                Echo($"Item: {config.CurrentlyProducedItem}");
+                Echo($"Level: {config.CurrentlyProducedLevel}");
+                Echo($"Target: {config.ProductionGoals[config.CurrentlyProducedItem][config.CurrentlyProducedLevel]}");
 
                 foreach (var assembler in config.Assemblers)
                 {
