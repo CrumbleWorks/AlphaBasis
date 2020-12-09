@@ -124,6 +124,7 @@ namespace IngameScript
 
             public string CurrentlyProducedItem { get; internal set; }
             public int CurrentlyProducedLevel { get; internal set; }
+            public int MaxLevel { get; internal set; }
 
             public ProductionConfig()
             {
@@ -221,6 +222,7 @@ namespace IngameScript
                         levelList.Add(jtem[i]);
                     }
                     item.Value.ProductionGoals.Add(items[item.Key][i], levelList);
+                    item.Value.MaxLevel = levelList.Count - 1;
                 }
             }
 
@@ -233,6 +235,11 @@ namespace IngameScript
             {
                 config.CurrentlyProducedLevel = int.MaxValue;
                 CalculateProductionState(config);
+
+                if (config.CurrentlyProducedLevel > config.MaxLevel)
+                {
+                    continue;
+                }
 
                 Echo("-------");
                 Echo($"item: {config.CurrentlyProducedItem}");
