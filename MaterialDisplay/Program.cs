@@ -21,15 +21,15 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        MyIni _ini;
+        private MyIni _ini;
 
-        List<MaterialDisplayConfiguration> _configs;
-        List<IMyInventory> _inventories;
-        List<MaterialDisplay> _displays;
-        IEnumerable<MyItemType> _allItemTypes;
-        Dictionary<MyItemType, ItemAmount> _totalItemAmounts;
+        private List<MaterialDisplayConfiguration> _configs;
+        private List<IMyInventory> _inventories;
+        private List<MaterialDisplay> _displays;
+        private IEnumerable<MyItemType> _allItemTypes;
+        private Dictionary<MyItemType, ItemAmount> _totalItemAmounts;
 
-        IDictionary<string, ItemTuple> materialDict = new Dictionary<string, ItemTuple>()
+        private IDictionary<string, ItemTuple> materialDict = new Dictionary<string, ItemTuple>()
         {
             { "Bulletproof Glass", new ItemTuple { Type = "MyObjectBuilder_Component", SubType = "BulletproofGlass" } },
             { "Canvas", new ItemTuple { Type = "MyObjectBuilder_Component", SubType = "Canvas" } },
@@ -120,24 +120,30 @@ namespace IngameScript
                 _totalItemAmounts = new Dictionary<MyItemType, ItemAmount>();
                 foreach (var itemType in _allItemTypes)
                 {
-                    _totalItemAmounts.Add(itemType, new ItemAmount { current = GetItemsVolume(itemType) });
+                    _totalItemAmounts.Add(itemType, new ItemAmount { current = GetItemsMängi(itemType) });
                 }
             }
             else
             {
                 foreach (var itemType in _totalItemAmounts.Keys)
                 {
-                    _totalItemAmounts[itemType].current = GetItemsVolume(itemType);
+                    _totalItemAmounts[itemType].current = GetItemsMängi(itemType);
                 }
             }
 
             _displays.ForEach(d => d.PrintMaterialStatus(_totalItemAmounts));
         }
 
-        public long GetItemsVolume(MyItemType type)
+        public long GetItemsMängi(MyItemType type)
         {
-            var amount = _inventories.Sum(i => i.GetItemAmount(type).RawValue / 1000); //m^3 to l
-            return Convert.ToInt64(Math.Truncate((double)amount * type.GetItemInfo().Volume));
+            if (!type.TypeId.Equals("MyObjectBuilder_Ingot") && !type.TypeId.Equals("MyObjectBuilder_Ore"))
+            {
+                var mängi = _inventories.Sum(i => (int)i.GetItemAmount(type));
+                return mängi;
+            }
+
+            var liter = _inventories.Sum(i => i.GetItemAmount(type).RawValue / 1000); //m^3 to l
+            return Convert.ToInt64(Math.Truncate((double)liter * type.GetItemInfo().Volume));
         }
 
         private List<MaterialDisplayConfiguration> ReadConfiguration()
@@ -259,10 +265,12 @@ namespace IngameScript
     {
         private long _current;
         private Queue<long> _history = new Queue<long>(25);
+
         /// <summary>
         /// Current amount in liters
         /// </summary>
         public long current { get { return _current; } set { _current = value; _history.Enqueue(value); } }
+
         /// <summary>
         /// Historic amount in liters
         /// </summary>
@@ -288,7 +296,16 @@ namespace IngameScript
 
             foreach (var itemType in _config.Items)
             {
-                var itemUnit = " l";
+                char[] itemUnit;
+                if (!itemType.TypeId.Equals("MyObjectBuilder_Ingot") && !itemType.TypeId.Equals("MyObjectBuilder_Ore"))
+                {
+                    itemUnit = new char[] { ' ', 's', 't', 'k' };
+                }
+                else
+                {
+                    itemUnit = new char[] { ' ', 'l' };
+                }
+
                 var itemAmount = totalItemAmounts[itemType].current;
 
                 var historicFactor = totalItemAmounts[itemType].current - totalItemAmounts[itemType].historic;
@@ -296,21 +313,21 @@ namespace IngameScript
 
                 if (itemAmount > 9999999999L)
                 {
-                    itemUnit = "Gl";
+                    itemUnit[0] = 'G';
                     itemAmount /= 1000000000;
                 }
                 else if (itemAmount > 9999999L)
                 {
-                    itemUnit = "Ml";
+                    itemUnit[0] = 'M';
                     itemAmount /= 1000000;
                 }
                 else if (itemAmount > 9999L)
                 {
-                    itemUnit = "kl";
+                    itemUnit[0] = 'k';
                     itemAmount /= 1000;
                 }
 
-                _config.TextSurfaces.ForEach(ts => PrintSingleMaterialStatus(ts, itemType, itemAmount, itemUnit, trend));
+                _config.TextSurfaces.ForEach(ts => PrintSingleMaterialStatus(ts, itemType, itemAmount, new string(itemUnit), trend));
             }
         }
 

@@ -68,6 +68,54 @@ namespace IngameScript
             { "Missile 200mm", new MyItemType("MyObjectBuilder_AmmoMagazine", "Missile200mm") }
         };
 
+        private readonly IDictionary<string, MyItemType> blueprintDict = new Dictionary<string, MyItemType>()
+        {
+            { "Bulletproof Glass", new MyItemType("MyObjectBuilder_BlueprintDefinition", "BulletproofGlass") },
+            { "Canvas", new MyItemType("MyObjectBuilder_BlueprintDefinition", "Canvas") },
+            { "Computer", new MyItemType("MyObjectBuilder_BlueprintDefinition", "ComputerComponent") },
+            { "Construction Comp", new MyItemType("MyObjectBuilder_BlueprintDefinition", "ConstructionComponent") },
+            { "Detector Comp", new MyItemType("MyObjectBuilder_BlueprintDefinition", "DetectorComponent") },
+            { "Display", new MyItemType("MyObjectBuilder_BlueprintDefinition", "Display") },
+            { "Explosives", new MyItemType("MyObjectBuilder_BlueprintDefinition", "ExplosivesComponent") },
+            { "Girder", new MyItemType("MyObjectBuilder_BlueprintDefinition", "GirderComponent") },
+            { "Gravity Gen. Comp", new MyItemType("MyObjectBuilder_BlueprintDefinition", "GravityGeneratorComponent") },
+            { "Interior Plate", new MyItemType("MyObjectBuilder_BlueprintDefinition", "InteriorPlate") },
+            { "Large Steel Tube", new MyItemType("MyObjectBuilder_BlueprintDefinition", "LargeTube") },
+            { "Medical Comp", new MyItemType("MyObjectBuilder_BlueprintDefinition", "MedicalComponent") },
+            { "Metal Grid", new MyItemType("MyObjectBuilder_BlueprintDefinition", "MetalGrid") },
+            { "Motor", new MyItemType("MyObjectBuilder_BlueprintDefinition", "MotorComponent") },
+            { "Oxygen", new MyItemType("MyObjectBuilder_BlueprintDefinition", "IceToOxygen") },
+            { "Power Cell", new MyItemType("MyObjectBuilder_BlueprintDefinition", "PowerCell") },
+            { "Radio Comm. Comp", new MyItemType("MyObjectBuilder_BlueprintDefinition", "RadioCommunicationComponent") },
+            { "Reactor Comp", new MyItemType("MyObjectBuilder_BlueprintDefinition", "ReactorComponent") },
+            { "Small Steel Tube", new MyItemType("MyObjectBuilder_BlueprintDefinition", "SmallTube") },
+            { "Solar Cell", new MyItemType("MyObjectBuilder_BlueprintDefinition", "SolarCell") },
+            { "Steel Plate", new MyItemType("MyObjectBuilder_BlueprintDefinition", "SteelPlate") },
+            { "Superconductor", new MyItemType("MyObjectBuilder_BlueprintDefinition", "Superconductor") },
+            { "Thruster Comp.", new MyItemType("MyObjectBuilder_BlueprintDefinition", "ThrustComponent") },
+            { "Automatic Rifle", new MyItemType("MyObjectBuilder_BlueprintDefinition", "AutomaticRifle") },
+            { "Precise Rifle", new MyItemType("MyObjectBuilder_BlueprintDefinition", "PreciseAutomaticRifle") },
+            { "Rapid Fire Rifle", new MyItemType("MyObjectBuilder_BlueprintDefinition", "RapidFireAutomaticRifle") },
+            { "Ultimate Rifle", new MyItemType("MyObjectBuilder_BlueprintDefinition", "UltimateAutomaticRifle") },
+            { "Welder 1", new MyItemType("MyObjectBuilder_BlueprintDefinition", "Welder") },
+            { "Welder 2", new MyItemType("MyObjectBuilder_BlueprintDefinition", "Welder2") },
+            { "Welder 3", new MyItemType("MyObjectBuilder_BlueprintDefinition", "Welder3") },
+            { "Welder 4", new MyItemType("MyObjectBuilder_BlueprintDefinition", "Welder4") },
+            { "Grinder 1", new MyItemType("MyObjectBuilder_BlueprintDefinition", "AngleGrinder") },
+            { "Grinder 2", new MyItemType("MyObjectBuilder_BlueprintDefinition", "AngleGrinder2") },
+            { "Grinder 3", new MyItemType("MyObjectBuilder_BlueprintDefinition", "AngleGrinder3") },
+            { "Grinder 4", new MyItemType("MyObjectBuilder_BlueprintDefinition", "AngleGrinder4") },
+            { "Drill 1", new MyItemType("MyObjectBuilder_BlueprintDefinition", "HandDrill") },
+            { "Drill 2", new MyItemType("MyObjectBuilder_BlueprintDefinition", "HandDrill2") },
+            { "Drill 3", new MyItemType("MyObjectBuilder_BlueprintDefinition", "HandDrill3") },
+            { "Drill 4", new MyItemType("MyObjectBuilder_BlueprintDefinition", "HandDrill4") },
+            { "Oxygen Bottle", new MyItemType("MyObjectBuilder_BlueprintDefinition", "OxygenBottle") },
+            { "Hydrogen Bottle", new MyItemType("MyObjectBuilder_BlueprintDefinition", "HydrogenBottle") },
+            { "Missile 200mm", new MyItemType("MyObjectBuilder_BlueprintDefinition", "Missile200mm") },
+            { "NATO 25x184mm", new MyItemType("MyObjectBuilder_BlueprintDefinition", "NATO_25x184mmMagazine") },
+            { "NATO 5.56x45mm", new MyItemType("MyObjectBuilder_BlueprintDefinition", "NATO_5p56x45mmMagazine") }
+        };
+
         public class ProductionConfig
         {
             public Dictionary<string, List<int>> ProductionGoals { get; internal set; }
@@ -99,6 +147,14 @@ namespace IngameScript
 
         private List<ProductionConfig> InitProductionConfigs()
         {
+            var customData = Me.CustomData;
+
+            MyIniParseResult result;
+            if (!_ini.TryParse(Me.CustomData, out result))
+            {
+                throw new Exception(result.ToString());
+            }
+
             var temp1 = new Dictionary<string, List<List<int>>>();
             var temp2 = new Dictionary<string, ProductionConfig>();
             var temp3 = new Dictionary<string, List<string>>();
@@ -125,7 +181,7 @@ namespace IngameScript
                 }
                 else
                 {
-                    if (keySplit[1].Equals(cargoGroupConfigurationKey))
+                    if (keySplit[1].Equals(assemblerGroupConfigurationKey))
                     {
                         var assemblerGroupName = _ini.Get(prodPuterConfigurationSection, key.Name).ToString();
                         var assemblerGroup = GridTerminalSystem.GetBlockGroupWithName(assemblerGroupName);
@@ -133,7 +189,7 @@ namespace IngameScript
                         assemblerGroup.GetBlocksOfType(assemblers);
                         temp2[keySplit[0]].Assemblers = assemblers;
                     }
-                    else if (keySplit[1].Equals(assemblerGroupConfigurationKey))
+                    else if (keySplit[1].Equals(cargoGroupConfigurationKey))
                     {
                         var cargoGroupName = _ini.Get(prodPuterConfigurationSection, key.Name).ToString();
                         var cargoGroup = GridTerminalSystem.GetBlockGroupWithName(cargoGroupName);
@@ -180,7 +236,7 @@ namespace IngameScript
                     if (assembler.IsQueueEmpty)
                     {
                         assembler.ClearQueue();
-                        assembler.AddQueueItem(materialDict[config.CurrentlyProducedItem], uftragsMängi);
+                        assembler.AddQueueItem(blueprintDict[config.CurrentlyProducedItem], uftragsMängi);
                     }
                 }
             }
@@ -204,7 +260,7 @@ namespace IngameScript
             {
                 var items = new List<MyInventoryItem>();
                 i.GetItems(items, item => item.Type.Equals(type));
-                return items.Count;
+                return items.Sum(eff => (int)eff.Amount);
             });
         }
 
