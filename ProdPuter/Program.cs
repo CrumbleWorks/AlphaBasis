@@ -124,6 +124,11 @@ namespace IngameScript
 
             public string CurrentlyProducedItem { get; internal set; }
             public int CurrentlyProducedLevel { get; internal set; }
+
+            public ProductionConfig()
+            {
+                ProductionGoals = new Dictionary<string, List<int>>();
+            }
         }
 
         private static readonly string prodPuterConfigurationSection = "ProdPuterConfiguration";
@@ -155,9 +160,9 @@ namespace IngameScript
                 throw new Exception(result.ToString());
             }
 
-            var temp1 = new Dictionary<string, List<List<int>>>();
-            var temp2 = new Dictionary<string, ProductionConfig>();
-            var temp3 = new Dictionary<string, List<string>>();
+            var items = new Dictionary<string, List<string>>();
+            var levels = new Dictionary<string, List<List<int>>>();
+            var configs = new Dictionary<string, ProductionConfig>();
 
             var configKeys = new List<MyIniKey>();
             _ini.GetKeys(prodPuterConfigurationSection, configKeys);
@@ -166,10 +171,10 @@ namespace IngameScript
             {
                 var keySplit = key.Name.Split('.');
 
-                if (!temp1.ContainsKey(keySplit[0]))
+                if (!levels.ContainsKey(keySplit[0]))
                 {
-                    temp1.Add(keySplit[0], new List<List<int>>());
-                    temp2.Add(keySplit[0], new ProductionConfig());
+                    levels.Add(keySplit[0], new List<List<int>>());
+                    configs.Add(keySplit[0], new ProductionConfig());
                 }
 
                 int level;
@@ -177,7 +182,7 @@ namespace IngameScript
                 {
                     var value = _ini.Get(prodPuterConfigurationSection, key.Name).ToString();
                     var goals = value.Split(',').ToList().Select(int.Parse).ToList();
-                    temp1[keySplit[0]].Insert(level, goals);
+                    levels[keySplit[0]].Insert(level, goals);
                 }
                 else
                 {
@@ -187,7 +192,7 @@ namespace IngameScript
                         var assemblerGroup = GridTerminalSystem.GetBlockGroupWithName(assemblerGroupName);
                         var assemblers = new List<IMyAssembler>();
                         assemblerGroup.GetBlocksOfType(assemblers);
-                        temp2[keySplit[0]].Assemblers = assemblers;
+                        configs[keySplit[0]].Assemblers = assemblers;
                     }
                     else if (keySplit[1].Equals(cargoGroupConfigurationKey))
                     {
@@ -196,32 +201,30 @@ namespace IngameScript
                         var blocks = new List<IMyTerminalBlock>();
                         cargoGroup.GetBlocks(blocks);
                         var inventories = blocks.FindAll(b => b.HasInventory).Select(b => b.GetInventory()).ToList();
-                        temp2[keySplit[0]].Containers = inventories;
+                        configs[keySplit[0]].Containers = inventories;
                     }
                     else if (keySplit[1].Equals(itemsConfigurationKey))
                     {
                         var value = _ini.Get(prodPuterConfigurationSection, key.Name).ToString();
-                        temp3[keySplit[0]] = value.Split(',').ToList();
+                        items[keySplit[0]] = value.Split(',').ToList();
                     }
                 }
             }
 
-            foreach (var item in temp2)
+            foreach (var item in configs)
             {
-                item.Value.ProductionGoals = new Dictionary<string, List<int>>();
-
-                for (int i = 0; i < temp3.Count; i++)
+                for (int i = 0; i < items[item.Key].Count; i++)
                 {
                     var levelList = new List<int>();
-                    foreach (var jtem in temp1[item.Key])
+                    foreach (var jtem in levels[item.Key])
                     {
                         levelList.Add(jtem[i]);
                     }
-                    item.Value.ProductionGoals.Add(temp3[item.Key][i], levelList);
+                    item.Value.ProductionGoals.Add(items[item.Key][i], levelList);
                 }
             }
 
-            return temp2.Values.ToList();
+            return configs.Values.ToList();
         }
 
         public void Main(string argument, UpdateType updateSource)
@@ -230,6 +233,11 @@ namespace IngameScript
             {
                 config.CurrentlyProducedLevel = int.MaxValue;
                 CalculateProductionState(config);
+
+                Echo("-------");
+                Echo($"item: {config.CurrentlyProducedItem}");
+                Echo($"level: {config.CurrentlyProducedLevel}");
+                Echo("=======");
 
                 foreach (var assembler in config.Assemblers)
                 {
