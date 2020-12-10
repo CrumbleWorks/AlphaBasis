@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarPuter", "SolarPuter\So
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProdPuter", "ProdPuter\ProdPuter.csproj", "{BEB2EB78-FB34-455B-B1FA-02E938EB4956}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDrill", "AutoDrill\AutoDrill.csproj", "{58C9CB23-BB59-4083-82BE-620F03571330}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -28,6 +30,8 @@ Global
 		{E9A3DBA0-D0D0-4B9B-80D0-1E645218CF8C}.Debug|x64.Build.0 = Debug|x64
 		{BEB2EB78-FB34-455B-B1FA-02E938EB4956}.Debug|x64.ActiveCfg = Debug|x64
 		{BEB2EB78-FB34-455B-B1FA-02E938EB4956}.Debug|x64.Build.0 = Debug|x64
+		{58C9CB23-BB59-4083-82BE-620F03571330}.Debug|x64.ActiveCfg = Debug|x64
+		{58C9CB23-BB59-4083-82BE-620F03571330}.Debug|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
