@@ -142,6 +142,7 @@ namespace IngameScript
         private readonly MyIni _ini;
 
         private readonly List<ProductionConfig> productionConfigs;
+        private readonly IMyTextSurface computerDisplay;
 
         public Program()
         {
@@ -149,6 +150,9 @@ namespace IngameScript
 
             _ini = new MyIni();
             productionConfigs = InitProductionConfigs();
+            computerDisplay = Me.GetSurface(0);
+
+            ConfigureComputerDisplay();
         }
 
         private List<ProductionConfig> InitProductionConfigs()
@@ -241,9 +245,11 @@ namespace IngameScript
                     continue;
                 }
 
-                Echo($"Item: {config.CurrentlyProducedItem}");
-                Echo($"Level: {config.CurrentlyProducedLevel}");
-                Echo($"Target: {config.ProductionGoals[config.CurrentlyProducedItem][config.CurrentlyProducedLevel]}");
+                computerDisplay.WriteText("", false);
+                computerDisplay.WriteText("Pink Puter\n\n", true);
+                computerDisplay.WriteText($"Item: {(config.CurrentlyProducedItem.Length > 11 ? config.CurrentlyProducedItem.Substring(0, 11) : config.CurrentlyProducedItem)}\n", true);
+                computerDisplay.WriteText($"Level: {config.CurrentlyProducedLevel}\n", true);
+                computerDisplay.WriteText($"Target: {config.ProductionGoals[config.CurrentlyProducedItem][config.CurrentlyProducedLevel]}", true);
 
                 foreach (var assembler in config.Assemblers)
                 {
@@ -299,6 +305,18 @@ namespace IngameScript
                     config.CurrentlyProducedItem = productionGoals.Key;
                 }
             }
+        }
+
+        private void ConfigureComputerDisplay()
+        {
+            computerDisplay.ContentType = ContentType.TEXT_AND_IMAGE;
+            computerDisplay.BackgroundColor = Color.Black;
+            computerDisplay.Font = "Monospace";
+            computerDisplay.FontSize = 1.25f;
+            computerDisplay.Alignment = TextAlignment.CENTER;
+            computerDisplay.FontColor = Color.Fuchsia;
+            computerDisplay.TextPadding = 15.0f;
+            computerDisplay.WriteText("", false);
         }
     }
 
