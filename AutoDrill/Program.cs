@@ -205,7 +205,7 @@ namespace IngameScript
             var group = GridTerminalSystem.GetBlockGroupWithName(groupName);
             if (group == null)
             {
-                throw new Exception($"No group named '{group}' found.");
+                throw new Exception($"No group named '{key}' found.");
             }
             return group;
         }
