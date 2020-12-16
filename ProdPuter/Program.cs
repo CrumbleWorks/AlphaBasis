@@ -137,7 +137,7 @@ namespace IngameScript
         private static readonly string assemblerGroupConfigurationKey = "AssemblerGroup";
         private static readonly string itemsConfigurationKey = "Items";
 
-        private static readonly decimal uftragsMängi = 100;
+        private static readonly decimal uftragsMängi = 10;
 
         private readonly MyIni _ini;
 
@@ -187,7 +187,14 @@ namespace IngameScript
                 {
                     var value = _ini.Get(prodPuterConfigurationSection, key.Name).ToString();
                     var goals = value.Split(',').ToList().Select(int.Parse).ToList();
-                    levels[keySplit[0]].Insert(level, goals);
+                    if (levels[keySplit[0]].Count > level)
+                    {
+                        levels[keySplit[0]].Insert(level, goals);
+                    }
+                    else
+                    {
+                        levels[keySplit[0]].Add(goals);
+                    }
                 }
                 else
                 {
