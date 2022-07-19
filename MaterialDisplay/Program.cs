@@ -103,7 +103,7 @@ namespace IngameScript
             Runtime.UpdateFrequency = UpdateFrequency.Update100;
 
             _ini = new MyIni();
-            _configs = ReadConfiguration();
+            _configs = ReadMaterialDisplayConfiguration();
 
             _allItemTypes = _configs.SelectMany(config => config.Items).Distinct();
 
@@ -146,7 +146,7 @@ namespace IngameScript
             return Convert.ToInt64(Math.Truncate((double)liter * type.GetItemInfo().Volume));
         }
 
-        private List<MaterialDisplayConfiguration> ReadConfiguration()
+        private List<MaterialDisplayConfiguration> ReadMaterialDisplayConfiguration()
         {
             var customData = Me.CustomData;
 
@@ -170,7 +170,6 @@ namespace IngameScript
                 var value = _ini.Get("MaterialDisplayConfig", key.Name).ToString();
 
                 // E.g. value = "Stone, Iron Ore; StIronDisplays"
-
                 var valueSplit = value.Split(';');
 
                 // E.g. valueSplit[0] = "Stone,Iron Ore"
@@ -197,12 +196,48 @@ namespace IngameScript
                 }
 
                 var textSurfaces = new List<IMyTextSurface>();
-                GridTerminalSystem.GetBlockGroupWithName(valueSplit[1]).GetBlocksOfType(textSurfaces);
+                var blockGroup = GridTerminalSystem.GetBlockGroupWithName(valueSplit[1]);
+                if (blockGroup != null)
+                {
+                    blockGroup.GetBlocksOfType(textSurfaces);
+                }
+                else
+                {
+                    Echo($"Display group '{valueSplit[1]}' does not exist in this grid.");
+                }
+
+                var panelConfiguration = ReadPanelConfiguration(key.Name);
 
                 materialDisplayConfigs.Add(new MaterialDisplayConfiguration { TextSurfaces = textSurfaces, Items = items, Title = valueSplit[2] });
             }
 
             return materialDisplayConfigs;
+        }
+
+        private PanelConfiguration ReadPanelConfiguration(string key)
+        {
+            var configKeys = new List<MyIniKey>();
+            _ini.GetKeys("PanelConfig", configKeys);
+
+            var value = _ini.Get("PanelCOnfig", key).ToString();
+
+            var panelConfiguration = new PanelConfiguration();
+
+            if (String.IsNullOrEmpty(value))
+            {
+                return panelConfiguration;
+            }
+
+            // E.g. value = "9;1.0f"
+            var valueSplit = value.Split(';');
+
+            var labelLength = Convert.ToInt32(valueSplit[0]);
+            var fontSize = (float) Convert.ToDouble(valueSplit[1]);
+
+            panelConfiguration.LabelLength = labelLength;
+            panelConfiguration.FontSize = fontSize;
+
+            return panelConfiguration;
         }
 
         private List<IMyInventory> GetInventories()
@@ -230,7 +265,7 @@ namespace IngameScript
                     textSurface.ContentType = ContentType.TEXT_AND_IMAGE;
                     textSurface.BackgroundColor = Color.Black;
                     textSurface.Font = "Monospace";
-                    textSurface.FontSize = 1.0f;
+                    textSurface.FontSize = 0.7f;
                     textSurface.FontColor = Color.Teal;
                     textSurface.Alignment = TextAlignment.LEFT;
                     textSurface.WriteText("", false);
@@ -253,6 +288,15 @@ namespace IngameScript
         public List<IMyTextSurface> TextSurfaces { get; internal set; }
         public List<MyItemType> Items { get; internal set; }
         public string Title { get; internal set; }
+    }
+
+    public class PanelConfiguration
+    {
+        public int LabelLength { get; internal set; } = 9;
+        public Color BackgroundColor { get; internal set; } = Color.Black;
+        public Color FontColor { get; internal set; } = Color.Teal;
+        public float FontSize { get; internal set; } = 1.0f;
+        public TextAlignment TextAlignment { get; internal set; } = TextAlignment.LEFT;
     }
 
     public class ItemTuple

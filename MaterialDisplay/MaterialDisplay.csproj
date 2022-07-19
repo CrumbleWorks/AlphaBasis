@@ -50,7 +50,7 @@
     <AdditionalFiles Include="MDK\whitelist.cache" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md" />
+    <None Include="Instructions.readme" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

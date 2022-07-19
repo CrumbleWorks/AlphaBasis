@@ -9,6 +9,10 @@ Example configuration:
 > [MaterialDisplayConfig]  
 > OreDisplay=Iron Ore,Gold Ore,Silicon Ore;OreDisplayGroup;Ores  
 > PlateDisplay=Steel Plate,Interior Plate;PlateDisplays1;Components  
+>
+> [PanelConfig]
+> OreDisplay=9;1.0
+> PlateDisplay=5;0.75
 
 The following is a list of possible item names, which can be used in a configuration:
  "Bulletproof Glass",  
@@ -75,4 +79,4 @@ The following is a list of possible item names, which can be used in a configura
  "Platinum Ingot",  
  "Silicon Wafer",  
  "Silver Ingot",  
- "Uranium Ingot"  
+ "Uranium Ingot"
