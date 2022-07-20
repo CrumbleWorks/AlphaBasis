@@ -1,21 +1,6 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
+﻿using Sandbox.ModAPI.Ingame;
 using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
-using System.Text;
-using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.GUI.TextPanel;
-using VRage.Game.ModAPI.Ingame.Utilities;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRage;
-using VRageMath;
 
 namespace IngameScript
 {
@@ -29,7 +14,7 @@ namespace IngameScript
             public float BaseLength { get; private set; }
             public float CurrentLength { get { return BaseLength + Piston.CurrentPosition - Piston.MinLimit; } }
             public float MaxLength { get { return BaseLength + Piston.MaxLimit - Piston.MinLimit; } }
-            public float CurrentExtension { get { return Piston.CurrentPosition - Piston.MinLimit;  } }
+            public float CurrentExtension { get { return Piston.CurrentPosition - Piston.MinLimit; } }
             public float MaxExtension { get { return Piston.MaxLimit - Piston.MinLimit; } }
 
             public PistonData(IMyPistonBase piston, string label, float baseLength)

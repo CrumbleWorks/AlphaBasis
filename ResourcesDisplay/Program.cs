@@ -1,21 +1,6 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
-using System.Text;
-using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.GUI.TextPanel;
-using VRage.Game.ModAPI.Ingame.Utilities;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRage;
-using VRageMath;
 
 namespace IngameScript
 {
@@ -25,14 +10,14 @@ namespace IngameScript
 
         ResourcesDisplayConfiguration _config;
         List<IMyTextSurface> _drawingSurfaces;
-        
+
         PowerDisplay _powerDisplay;
 
         public Program()
         {
             Runtime.UpdateFrequency = UpdateFrequency.Update100;
 
-            _ini = new MyIni();            
+            _ini = new MyIni();
             _config = ReadConfiguration();
 
             ConfigureDrawingSurfaces();
@@ -123,11 +108,12 @@ namespace IngameScript
                 drawingSurface.FontColor = Color.DarkOrange;
                 drawingSurface.Alignment = TextAlignment.LEFT;
                 drawingSurface.WriteText("", false);
-            });            
+            });
         }
     }
 
-    public class PowerDisplay {
+    public class PowerDisplay
+    {
         private List<IMyBatteryBlock> _batteries;
         private List<IMyInventory> _cargos;
         private IDictionary<string, IEnumerable<IMyInventory>> _CargoCargos;
@@ -211,6 +197,6 @@ namespace IngameScript
     public class ResourcesDisplayConfiguration
     {
         public string LCDGroup { get; internal set; }
-        public IDictionary<string, IEnumerable<IMyInventory>> CargoGroups { get; internal set;  }
+        public IDictionary<string, IEnumerable<IMyInventory>> CargoGroups { get; internal set; }
     }
 }

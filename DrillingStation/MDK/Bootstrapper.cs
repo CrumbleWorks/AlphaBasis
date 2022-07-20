@@ -1,4 +1,6 @@
-﻿namespace IngameScript.MDK
+﻿using Malware.MDKUtilities;
+
+namespace IngameScript.MDK
 {
     public class TestBootstrapper
     {

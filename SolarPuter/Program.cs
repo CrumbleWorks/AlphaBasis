@@ -1,20 +1,10 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
+﻿using Sandbox.ModAPI.Ingame;
 using SpaceEngineers.Game.ModAPI.Ingame;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using VRage;
-using VRage.Collections;
-using VRage.Game;
-using VRage.Game.Components;
 using VRage.Game.GUI.TextPanel;
-using VRage.Game.ModAPI.Ingame;
 using VRage.Game.ModAPI.Ingame.Utilities;
-using VRage.Game.ObjectBuilders.Definitions;
 using VRageMath;
 
 namespace IngameScript
@@ -104,7 +94,7 @@ namespace IngameScript
                 var drivingRotor = GetSingleRotorByTag(stators, drivingRotorTag);
                 var bearing = GetSingleRotorByTag(stators, bearingRotorTag);
 
-                solarArrays.Add(new SolarArray { Label = solarArrayName, Panels = panels, DrivingRotor = drivingRotor, Bearing = bearing, PreviousMaxOutput = 0, MovementStatus = SolarArrayMovementStatus.Stopped});
+                solarArrays.Add(new SolarArray { Label = solarArrayName, Panels = panels, DrivingRotor = drivingRotor, Bearing = bearing, PreviousMaxOutput = 0, MovementStatus = SolarArrayMovementStatus.Stopped });
             }
             return solarArrays;
         }
@@ -134,7 +124,7 @@ namespace IngameScript
         {
             var displayGroupName = GetDisplayGroupName();
             var displayGroup = GridTerminalSystem.GetBlockGroupWithName(displayGroupName);
-            
+
             if (displayGroup == null)
             {
                 Echo($"No group named '{displayGroupName}' found. Output unavailable.");
