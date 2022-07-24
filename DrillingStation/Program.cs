@@ -47,6 +47,42 @@ namespace IngameScript
             public virtual void Stop(Program p) { }
             public virtual void Reset(Program p) { }
 
+            /// <returns>Unique tag for (de)serialization of the state</returns>
+            public abstract string Tag();
+            public virtual string Serialize()
+            {
+                return Tag();
+            }
+
+            public static State Deserialize(string data)
+            {
+                string[] split = data.Split(new[] { ';' }, 2);
+
+                switch (split[0])
+                {
+                    case "ARC":
+                        return new Arc(split[1]);
+                    case "CLP":
+                        return new Cleanup(split[1]);
+                    case "IDL":
+                        return new Idle(split[1]);
+                    case "EXP":
+                        return new Expanding(split[1]);
+                    case "HLT":
+                        return new Halted(split[1]);
+                    case "PLG":
+                        return new Plunging();
+                    case "RST":
+                        return new Resetting(split[1]);
+                    case "STP":
+                        return new Stopped();
+                    case "STR":
+                        return new Startup();
+                    default:
+                        throw new Exception($"Tag: '{split[0]}' cannot be deserialized. No ctor defined!");
+                }
+            }
+
             protected void LockDownMachinery(Program p)
             {
                 //Rotor
@@ -83,6 +119,28 @@ namespace IngameScript
 
             private bool isRotorReset = false;
             private bool arePistonsReset = false;
+
+            public override string Tag()
+            {
+                return "RST";
+            }
+
+            public override string Serialize()
+            {
+                return $"{Tag()};{rotorMinAngle};{rotorMaxAngle};{isRotorReset};{arePistonsReset}";
+            }
+
+            /// <summary>
+            /// Deserialize ctor
+            /// </summary>
+            internal Resetting(string deserialize)
+            {
+                string[] split = deserialize.Split(new[] { ';' });
+                rotorMinAngle = float.Parse(split[0]);
+                rotorMaxAngle = float.Parse(split[1]);
+                isRotorReset = bool.Parse(split[2]);
+                arePistonsReset = bool.Parse(split[3]);
+            }
 
             public Resetting(Program p)
             {
@@ -161,6 +219,11 @@ namespace IngameScript
         /// </summary>
         private class Stopped : State
         {
+            public override string Tag()
+            {
+                return "STP";
+            }
+
             public override void Run(Program p)
             {
                 p.Log("Stopped...");
@@ -179,6 +242,11 @@ namespace IngameScript
 
         private class Startup : State
         {
+            public override string Tag()
+            {
+                return "STR";
+            }
+
             public override void Run(Program p)
             {
                 p.Log("Starting Up...");
@@ -199,9 +267,31 @@ namespace IngameScript
         {
             private State haltedState;
 
+            public override string Tag()
+            {
+                return "HLT";
+            }
+
+            public override string Serialize()
+            {
+                return $"{Tag()};{haltedState.Tag()};{haltedState.Serialize()}";
+            }
+
+            /// <summary>
+            /// Deserialize ctor
+            /// </summary>
+            internal Halted(string deserialize)
+            {
+                string[] split = deserialize.Split(new[] { ';' }, 2);
+                haltedState = Deserialize(split[1]);
+            }
+
+            public Halted() { }
+
             public override void Run(Program p)
             {
                 p.Log("Halted...");
+                p.Log($"Current state: {haltedState.GetType().Name}");
             }
 
             public override void HandleTransitionFrom(Program p, State previous)
@@ -232,6 +322,35 @@ namespace IngameScript
         private class Expanding : State
         {
             private readonly Arc.Direction nextDirection;
+
+            public override string Tag()
+            {
+                return "EXP";
+            }
+
+            public override string Serialize()
+            {
+                return $"{Tag()};{(int)nextDirection}";
+            }
+
+            /// <summary>
+            /// Deserialize ctor
+            /// </summary>
+            internal Expanding(string deserialize)
+            {
+                string[] split = deserialize.Split(new[] { ';' });
+                switch (int.Parse(split[0]))
+                {
+                    case (int)Arc.Direction.Clockwise:
+                        nextDirection = Arc.Direction.Clockwise;
+                        break;
+                    case (int)Arc.Direction.CounterClockwise:
+                        nextDirection = Arc.Direction.CounterClockwise;
+                        break;
+                    default:
+                        throw new Exception($"Unknown direction when deserializing Arc state: {split[0]}");
+                }
+            }
 
             public Expanding(Program p, Arc.Direction nextDirection)
             {
@@ -288,6 +407,35 @@ namespace IngameScript
 
             private readonly Direction direction;
 
+            public override string Tag()
+            {
+                return "ARC";
+            }
+
+            public override string Serialize()
+            {
+                return $"{Tag()};{(int)direction}";
+            }
+
+            /// <summary>
+            /// Deserialize ctor
+            /// </summary>
+            internal Arc(string deserialize)
+            {
+                string[] split = deserialize.Split(new[] { ';' });
+                switch (int.Parse(split[0]))
+                {
+                    case (int)Arc.Direction.Clockwise:
+                        direction = Arc.Direction.Clockwise;
+                        break;
+                    case (int)Direction.CounterClockwise:
+                        direction = Arc.Direction.CounterClockwise;
+                        break;
+                    default:
+                        throw new Exception($"Unknown direction when deserializing Arc state: {split[0]}");
+                }
+            }
+
             public Arc(Program p, Direction direction)
             {
                 if (p.isRotorUpsideDown)
@@ -318,15 +466,27 @@ namespace IngameScript
                     case Direction.Clockwise:
                         if (p.drillArmRotor.Angle == p.drillArmRotor.UpperLimitRad)
                         {
-                            if (v) TransitionTo(p, new Cleanup(p, Direction.CounterClockwise));
-                            TransitionTo(p, new Idle(new Expanding(p, Direction.CounterClockwise)));
+                            if (v)
+                            {
+                                TransitionTo(p, new Cleanup(p, Direction.CounterClockwise));
+                            }
+                            else
+                            {
+                                TransitionTo(p, new Idle(new Expanding(p, Direction.CounterClockwise)));
+                            }
                         }
                         break;
                     case Direction.CounterClockwise:
                         if (p.drillArmRotor.Angle == p.drillArmRotor.LowerLimitRad)
                         {
-                            if (v) TransitionTo(p, new Cleanup(p, Direction.Clockwise));
-                            TransitionTo(p, new Idle(new Expanding(p, Direction.Clockwise)));
+                            if (v)
+                            {
+                                TransitionTo(p, new Cleanup(p, Direction.Clockwise));
+                            }
+                            else
+                            {
+                                TransitionTo(p, new Idle(new Expanding(p, Direction.Clockwise)));
+                            }
                         }
                         break;
                 }
@@ -363,6 +523,40 @@ namespace IngameScript
 
             private bool isRotorReset = false;
             private bool arePistonsReset = false;
+
+            public override string Tag()
+            {
+                return "CLP";
+            }
+
+            public override string Serialize()
+            {
+                return $"{Tag()};{(int)direction};{rotorMinAngle};{rotorMaxAngle};{currentStep};{isRotorReset};{arePistonsReset}";
+            }
+
+            /// <summary>
+            /// Deserialize ctor
+            /// </summary>
+            internal Cleanup(string deserialize)
+            {
+                string[] split = deserialize.Split(new[] { ';' });
+                switch (int.Parse(split[0]))
+                {
+                    case (int)Arc.Direction.Clockwise:
+                        direction = Arc.Direction.Clockwise;
+                        break;
+                    case (int)Arc.Direction.CounterClockwise:
+                        direction = Arc.Direction.CounterClockwise;
+                        break;
+                    default:
+                        throw new Exception($"Unknown direction when deserializing Cleanup state: {split[0]}");
+                }
+                rotorMinAngle = float.Parse(split[1]);
+                rotorMaxAngle = float.Parse(split[2]);
+                currentStep = int.Parse(split[3]);
+                isRotorReset = bool.Parse(split[4]);
+                arePistonsReset = bool.Parse(split[5]);
+            }
 
             public Cleanup(Program p, Arc.Direction directionToOtherSide)
             {
@@ -519,6 +713,26 @@ namespace IngameScript
             private readonly State next;
             private int idlingCount = 0;
 
+            public override string Tag()
+            {
+                return "IDL";
+            }
+
+            public override string Serialize()
+            {
+                return $"{Tag()};{idlingCount};{next.Tag()};{next.Serialize()}";
+            }
+
+            /// <summary>
+            /// Deserialize ctor
+            /// </summary>
+            internal Idle(string deserialize)
+            {
+                string[] split = deserialize.Split(new[] { ';' }, 2);
+                idlingCount = int.Parse(split[0]);
+                next = Deserialize(split[1]);
+            }
+
             public Idle(State next)
             {
                 this.next = next;
@@ -557,6 +771,16 @@ namespace IngameScript
         /// </summary>
         private class Plunging : State
         {
+            public override string Tag()
+            {
+                return "PLG";
+            }
+
+            /// <summary>
+            /// Deserialize ctor
+            /// </summary>
+            internal Plunging() { }
+
             public Plunging(Program p)
             {
                 p.drillPlungerPistons.ForEach(piston => piston.MaxLimit += p.plungeDepthPerPiston);
@@ -723,7 +947,7 @@ namespace IngameScript
             //load storage
             if (Storage.Length > 0)
             {
-                //TODO implement
+                activeState = State.Deserialize(Storage);
                 Log(@"Loaded state from storage. Continuing from last save.", LogLevel.Info);
             }
 
@@ -733,8 +957,7 @@ namespace IngameScript
 
         public void Save()
         {
-            //TODO implement
-            Storage = "";
+            Storage = activeState.Serialize();
             Log(@"Saved state to storage.", LogLevel.Info);
         }
 
@@ -745,11 +968,12 @@ namespace IngameScript
             //regular update
             if ((updateSource & (UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100)) != 0)
             {
-                if(CheckIfBuffersHaveSpaceLeft())
+                if (CheckIfBuffersHaveSpaceLeft())
                 {
                     activeState.Run(this);
-                    return;
                 }
+
+                return;
             }
 
             //update due to anything else than regular ticking
@@ -781,7 +1005,7 @@ namespace IngameScript
             var drillBufferCurrent = drillBufferInventories.Select(inventory => ((float)inventory.CurrentVolume)).Aggregate(0.0f, (currVolume, volume) => currVolume += volume);
             Log($"Buffers at {drillBufferCurrent / drillBufferMaxFill * 100}%");
 
-            if(drillBufferCurrent >= drillBufferMaxFill)
+            if (drillBufferCurrent >= drillBufferMaxFill)
             {
                 Log($"Buffers full! Waiting for buffers to empty.");
 

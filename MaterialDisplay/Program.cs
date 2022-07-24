@@ -222,7 +222,7 @@ namespace IngameScript
             var valueSplit = value.Split(';');
 
             var labelLength = Convert.ToInt32(valueSplit[0]);
-            var fontSize = (float) Convert.ToDouble(valueSplit[1]);
+            var fontSize = (float)Convert.ToDouble(valueSplit[1]);
 
             panelConfiguration.LabelLength = labelLength;
             panelConfiguration.FontSize = fontSize;
