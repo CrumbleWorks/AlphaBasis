@@ -579,6 +579,7 @@ namespace IngameScript
                 switch (currentStep)
                 {
                     case 0: //init
+                        p.Log("...Init");
                         LockDownMachinery(p);
 
                         p.drillArmPistonsForward.ForEach(piston => piston.Retract());
@@ -588,6 +589,7 @@ namespace IngameScript
                         ++currentStep;
                         break;
                     case 1: //retracting
+                        p.Log("...Retracting");
                         if (p.drillArmPistonsForward.All(piston => piston.MinLimit == piston.CurrentPosition)
                         && p.drillArmPistonsBackward.All(piston => piston.MaxLimit == piston.CurrentPosition))
                         {
@@ -601,6 +603,7 @@ namespace IngameScript
                         }
                         break;
                     case 2: //switching sides
+                        p.Log("...Switching Sides");
                         switch (direction)
                         {
                             case Arc.Direction.Clockwise:
@@ -619,6 +622,7 @@ namespace IngameScript
 
                         break;
                     case 3: //starting extension
+                        p.Log("...Extending");
                         LockDownMachinery(p);
 
                         p.drillArmPistonsForward.ForEach(piston => piston.Extend());
@@ -628,6 +632,7 @@ namespace IngameScript
                         ++currentStep;
                         break;
                     case 4: //extending
+                        p.Log("...More Extending");
                         if (p.drillArmPistonsForward.All(piston => piston.MaxLimit == piston.CurrentPosition)
                         && p.drillArmPistonsBackward.All(piston => piston.MinLimit == piston.CurrentPosition))
                         {
@@ -636,15 +641,15 @@ namespace IngameScript
                             float targetSpeedForRotorRPM = CalculateRotorVelocityForRadius(p, (float)p.armMinRadiusMeters);
 
                             float currentAngle = p.drillArmRotor.Angle;
-                            if (currentAngle > p.armNeutralAngleRads)
-                            {
-                                p.drillArmRotor.LowerLimitRad = (float)p.armNeutralAngleRads;
-                                p.drillArmRotor.TargetVelocityRPM = -targetSpeedForRotorRPM;
-                            }
-                            else if (currentAngle < p.armNeutralAngleRads)
+                            if (currentAngle < p.armNeutralAngleRads || ((currentAngle + 360) % 360) > p.armNeutralAngleRads ) //sometimes the shitty rotor displays only positive angles
                             {
                                 p.drillArmRotor.UpperLimitRad = (float)p.armNeutralAngleRads;
                                 p.drillArmRotor.TargetVelocityRPM = targetSpeedForRotorRPM;
+                            }
+                            else if (currentAngle > p.armNeutralAngleRads)
+                            {
+                                p.drillArmRotor.LowerLimitRad = (float)p.armNeutralAngleRads;
+                                p.drillArmRotor.TargetVelocityRPM = -targetSpeedForRotorRPM;
                             }
 
                             p.drillArmRotor.RotorLock = false;
@@ -653,11 +658,14 @@ namespace IngameScript
                             p.drillArmPistonsForward.ForEach(piston => piston.Retract());
                             p.drillArmPistonsBackward.ForEach(piston => piston.Extend());
 
+                            p.drillArmPistons.ForEach(piston => piston.Enabled = true);
+
                             ++currentStep;
                         }
 
                         break;
                     case 5: //resetting
+                        p.Log("...Resetting");
                         if (!isRotorReset && p.drillArmRotor.Angle == p.armNeutralAngleRads)
                         {
                             LockDownMachinery(p);
@@ -669,6 +677,8 @@ namespace IngameScript
                             p.drillArmRotor.UpperLimitRad = rotorMaxAngle;
 
                             isRotorReset = true;
+
+                            p.drillArmPistons.ForEach(piston => piston.Enabled = true);
                         }
 
                         if (!arePistonsReset
@@ -691,11 +701,6 @@ namespace IngameScript
                         TransitionTo(p, new Plunging(p));
                         break;
                 }
-            }
-
-            public override void Stop(Program p)
-            {
-                TransitionTo(p, new Halted());
             }
 
             public override void Reset(Program p)
@@ -790,12 +795,10 @@ namespace IngameScript
             {
                 p.Log("Plunging...");
 
-                if (!p.drillPlungerPistons.All(piston => piston.CurrentPosition == piston.MaxLimit))
+                if (p.drillPlungerPistons.All(piston => piston.CurrentPosition == piston.MaxLimit))
                 {
-                    return;
+                    TransitionTo(p, new Startup());
                 }
-
-                TransitionTo(p, new Startup());
             }
 
             public override void HandleTransitionFrom(Program p, State previous)
@@ -949,9 +952,11 @@ namespace IngameScript
             {
                 activeState = State.Deserialize(Storage);
                 Log(@"Loaded state from storage. Continuing from last save.", LogLevel.Info);
+            } else
+            {
+                activeState = new Stopped();
             }
 
-            activeState = new Stopped();
             Echo = EchoToScreen; // Echo Redirecting
         }
 
