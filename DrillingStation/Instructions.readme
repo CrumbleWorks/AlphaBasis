@@ -1,5 +1,51 @@
-﻿R e a d m e
+﻿Controlling
 -----------
 
-In this file you can include any instructions or other comments you want to have injected onto the 
-top of your final script. You can safely delete this file if you do not want any such comments.
+The drill is using an internal state-machine, this allows it to start/stop at will, as well as interrupt complex operations without damaging the drill-state or the hardware. You can control the drill by passing arguments to the program:
+ "run"   -> start/continue running the drill
+ "halt"  -> immediately stop whatever is running and wait
+ "reset" -> reset into initial state (retracting all pistons, resetting to neutral rotor position, etc.)
+
+Configuration
+-------------
+
+Below you find a complete configuration. Where applicable, configuration-keys are mapped to default values and can thus be left out.
+Parts that are controlled by the script must be tagged, by including the relevant tag '[TAG]' somewhere in the name of the part.
+
+[Drill]
+# A group containing all the elements of the drill-arm (Pistons, Rotor).
+#  - Backwards facing pistons (extended when reset): [PB]
+#  - Forwards facing pistons (retracted when reset): [PF]
+#  - Horizontal rotor (pivot point of the arm): [PR]
+DrillArm=<DEFINE_ME>
+
+# A group containing all the elements of the drill-head (e.g. drills, maybe a rotor?, welder head?). The group is used to turn the head on/off.
+DrillHead=<DEFINE_ME>
+
+# A group containing all the elements of the drill-plunger (arm that goes down).
+#  - Plunging pistons: [PDP]
+#  - Maglock to hold the pluging arm: [PDM]
+DrillPlunger=<DEFINE_ME>
+
+# A group containing containers that act as a buffer for the drill's outputs. The drill will eventually shut itself down if the containers are full.
+DrillBuffer=<DEFINE_ME>
+# Threshold, in percent of used buffer storage, at which the drill turns itself off
+DrillBuffer_MaxPercent=80
+
+# The speed at which the drill should move
+TargetSpeed_MetersSecond=0.25
+# The distance the drill should step out for each drilling arc. Usually you want this to be the size of, or less than, the diameter of your drill-head in order to achieve a clean shave.
+StepLength_Meters=2.5
+# The depth the plunger should plunge after a full slice. Considering a drillhead with only down-facing drills, you want this at about 1 block.
+PlungeDepth_Meters=2.5
+
+# The minimal distance between drill-head and the rotor marked with [PR]. The default value assumes a piston with an attached drill at the end - thus 5m + the 1.25m from the [PR] rotor.
+DrillArm_StaticRadius_Meters=6.25
+
+# The angle at which the [PR] rotor is considered to be in a reset state.
+RotorNeutralPosition_Degrees=0.0
+# Set if the [PR] rotor is inverted (e.g. hanging from a ceiling).
+IsRotorUpsideDown=false;
+
+# How long the drill should idle at the end of a cutting arc, before extending and inverting directions.
+IdlingTime_Seconds=5
